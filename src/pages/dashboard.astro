@@ -1,18 +1,18 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 
-// Data dummy untuk dojo dan room
-const venueData = {
+// Data dummy untuk ruangan dan tim
+const dataRuangan = {
   rooms: [
-    { name: "Room A", status: "BP 1 Selesai", teams: ["UCDS", "Marjorie", "Viva la Vida", "Moonlight"] },
-    { name: "Room B", status: "BP 1 Selesai", teams: ["Windi Wondo", "Tutty Fruity", "Prajurit", "Samudra"] },
-    { name: "Room C", status: "BP 1 Selesai", teams: ["Garuda", "Merpati", "Thunder", "Petir"] },
-    { name: "Room D", status: "BP 1 Selesai", teams: ["Mawar", "Melati", "Anggrek", "Bougenville"] },
+    { name: "Ruangan A", status: "BP 1 Selesai", teams: ["UCDS", "Marjorie", "Viva la Vida", "Moonlight"] },
+    { name: "Ruangan B", status: "BP 1 Selesai", teams: ["Windi Wondo", "Tutty Fruity", "Prajurit", "Samudra"] },
+    { name: "Ruangan C", status: "BP 1 Selesai", teams: ["Garuda", "Merpati", "Thunder", "Petir"] },
+    { name: "Ruangan D", status: "BP 1 Selesai", teams: ["Mawar", "Melati", "Anggrek", "Bougenville"] },
   ]
 };
 
 // Data dummy untuk hasil VP
-const vpResults = [
+const hasilVP = [
   { team: "UCDS", vp: 18, rounds: ["BP 1", "BP 2", "Semifinal"] },
   { team: "Windi Wondo", vp: 15, rounds: ["BP 1", "BP 2", "Semifinal"] },
   { team: "Marjorie", vp: 14, rounds: ["BP 1", "BP 2", "Semifinal"] },
@@ -24,64 +24,27 @@ const vpResults = [
 ];
 
 // Status progres turnamen
-const tournamentProgress = {
+const progressTurnamen = {
   currentRound: "Semifinal",
   completed: ["BP 1", "BP 2"],
-  upcoming: ["Final Day 1", "Final Day 2", "Final Day 3"],
+  upcoming: ["Final Hari 1", "Final Hari 2", "Final Hari 3"],
   totalTeams: 16,
   remainingTeams: 4
 };
 
-const drawVictoryPointsChart = () => {
-    const ctx = document.getElementById('victoryPointsChart');
-    
-    if (!ctx) return;
-    
-    // Data untuk chart (dari contoh sebelumnya)
-    const teams = ['UCDS', 'Windi Wondo', 'Marjorie', 'Tutty Fruity', 'Prajurit'];
-    const vpData = [16, 12, 6, 2, 3];
-    
-    // Buat chart dengan library chart.js
-    // Catatan: Dalam implementasi nyata, ini akan menggunakan chart.js
-    // Di contoh ini hanya menampilkan representasi visual sederhana
-    
-    const chartContainer = document.createElement('div');
-    chartContainer.className = 'flex items-end h-64 space-x-2';
-    
-    teams.forEach((team, index) => {
-      const bar = document.createElement('div');
-      const height = (vpData[index] / Math.max(...vpData)) * 100;
-      bar.className = 'flex-1 bg-blue-500 rounded-t';
-      bar.style.height = `${height}%`;
-      
-      const label = document.createElement('div');
-      label.className = 'text-xs text-center mt-2 font-medium';
-      label.textContent = team;
-      
-      const valueLabel = document.createElement('div');
-      valueLabel.className = 'text-white text-center p-1 font-bold';
-      valueLabel.textContent = vpData[index];
-      bar.appendChild(valueLabel);
-      
-      const barContainer = document.createElement('div');
-      barContainer.className = 'flex flex-col items-center';
-      barContainer.appendChild(bar);
-      barContainer.appendChild(label);
-      
-      chartContainer.appendChild(barContainer);
-    });
-    
-    ctx.appendChild(chartContainer);
-  };
-  
-  // Initialize charts after page load
-  document.addEventListener('DOMContentLoaded', () => {
-    drawVictoryPointsChart();
-  });
-
+// Data contoh perhitungan VP
+const contohPerhitunganVP = {
+  round: "BP 1, Ruangan A",
+  teams: [
+    { position: "OG", teamName: "UCDS", teamScore: 76.5, rank: 1, vp: 3 },
+    { position: "OO", teamName: "Marjorie", teamScore: 74.0, rank: 2, vp: 2 },
+    { position: "CG", teamName: "Viva la Vida", teamScore: 73.5, rank: 3, vp: 1 },
+    { position: "CO", teamName: "Moonlight", teamScore: 71.0, rank: 4, vp: 0 }
+  ]
+};
 ---
 
-<BaseLayout title="Dashboard">
+<BaseLayout title="Dasbor">
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
     <!-- Status Turnamen -->
     <div class="bg-white p-6 rounded-lg shadow">
@@ -89,7 +52,7 @@ const drawVictoryPointsChart = () => {
       
       <div class="flex items-center mb-4">
         <div class="text-2xl font-bold text-blue-700 mr-3">
-          {tournamentProgress.currentRound}
+          {progressTurnamen.currentRound}
         </div>
         <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded text-sm">
           Saat Ini
@@ -100,7 +63,7 @@ const drawVictoryPointsChart = () => {
         <div>
           <h3 class="text-sm font-semibold text-gray-500 mb-2">Ronde Selesai</h3>
           <div class="space-y-1">
-            {tournamentProgress.completed.map(round => (
+            {progressTurnamen.completed.map(round => (
               <div class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm inline-block mr-2">
                 {round} ✓
               </div>
@@ -111,7 +74,7 @@ const drawVictoryPointsChart = () => {
         <div>
           <h3 class="text-sm font-semibold text-gray-500 mb-2">Ronde Mendatang</h3>
           <div class="space-y-1">
-            {tournamentProgress.upcoming.map(round => (
+            {progressTurnamen.upcoming.map(round => (
               <div class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm inline-block mr-2">
                 {round}
               </div>
@@ -121,7 +84,7 @@ const drawVictoryPointsChart = () => {
       </div>
       
       <div class="mt-4 flex items-center">
-        <div class="text-lg font-semibold">{tournamentProgress.remainingTeams}/{tournamentProgress.totalTeams}</div>
+        <div class="text-lg font-semibold">{progressTurnamen.remainingTeams}/{progressTurnamen.totalTeams}</div>
         <div class="ml-2 text-gray-600">Tim tersisa</div>
       </div>
     </div>
@@ -140,7 +103,7 @@ const drawVictoryPointsChart = () => {
           </tr>
         </thead>
         <tbody>
-          {vpResults.slice(0, 5).map((team, index) => (
+          {hasilVP.slice(0, 5).map((team, index) => (
             <tr class={index % 2 === 0 ? 'bg-gray-50' : ''}>
               <td class="py-2 px-3">{index + 1}</td>
               <td class="py-2 px-3 font-medium">{team.team}</td>
@@ -163,12 +126,60 @@ const drawVictoryPointsChart = () => {
     </div>
   </div>
   
+  <!-- Perhitungan Victory Points -->
+  <div class="bg-white p-6 rounded-lg shadow mb-8">
+    <h2 class="text-xl font-bold mb-4">Perhitungan Victory Points (VP)</h2>
+    
+    <div class="mb-4">
+      <p class="mb-2">Victory Points (VP) adalah poin yang diberikan berdasarkan peringkat tim dalam satu ruangan debat:</p>
+      <ul class="list-disc pl-6 mb-4">
+        <li class="mb-1"><span class="font-bold">Peringkat #1:</span> 3 Victory Points</li>
+        <li class="mb-1"><span class="font-bold">Peringkat #2:</span> 2 Victory Points</li>
+        <li class="mb-1"><span class="font-bold">Peringkat #3:</span> 1 Victory Point</li>
+        <li class="mb-1"><span class="font-bold">Peringkat #4:</span> 0 Victory Point</li>
+      </ul>
+      
+      <h3 class="font-semibold mb-2">Contoh Perhitungan VP ({contohPerhitunganVP.round}):</h3>
+      <div class="overflow-x-auto">
+        <table class="min-w-full border">
+          <thead>
+            <tr class="bg-gray-100">
+              <th class="py-2 px-3 border">Posisi</th>
+              <th class="py-2 px-3 border">Tim</th>
+              <th class="py-2 px-3 border">Skor Tim</th>
+              <th class="py-2 px-3 border">Peringkat</th>
+              <th class="py-2 px-3 border font-bold">Victory Points</th>
+            </tr>
+          </thead>
+          <tbody>
+            {contohPerhitunganVP.teams.map((team, index) => (
+              <tr class={index % 2 === 0 ? 'bg-gray-50' : ''}>
+                <td class="py-2 px-3 border">{team.position}</td>
+                <td class="py-2 px-3 border font-medium">{team.teamName}</td>
+                <td class="py-2 px-3 border">{team.teamScore}</td>
+                <td class="py-2 px-3 border">{team.rank}</td>
+                <td class="py-2 px-3 border font-bold">{team.vp}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="mt-4 bg-blue-50 p-3 rounded border border-blue-200">
+        <p class="text-sm">
+          <span class="font-semibold">Rumus Perhitungan:</span> Peringkat dihitung berdasarkan Skor Tim (rata-rata dari 2 speaker).
+          Tim dengan skor tertinggi mendapat peringkat #1 dan 3 VP, tim kedua mendapat 2 VP, tim ketiga mendapat 1 VP, dan tim terakhir tidak mendapat VP.
+        </p>
+      </div>
+    </div>
+  </div>
+  
   <!-- Rooms -->
   <div class="bg-white p-6 rounded-lg shadow mb-8">
-    <h2 class="text-xl font-bold mb-4">Status Room</h2>
+    <h2 class="text-xl font-bold mb-4">Status Ruangan</h2>
     
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {venueData.rooms.map(room => (
+      {dataRuangan.rooms.map(room => (
         <div class="border rounded-lg p-4">
           <div class="flex justify-between items-center mb-3">
             <h3 class="font-semibold">{room.name}</h3>
@@ -190,6 +201,12 @@ const drawVictoryPointsChart = () => {
     </div>
   </div>
   
+  <!-- Graf Victory Points -->
+  <div class="bg-white p-6 rounded-lg shadow mb-8">
+    <h2 class="text-xl font-bold mb-4">Grafik Victory Points</h2>
+    <div id="victoryPointsChart" class="mt-4 h-72"></div>
+  </div>
+  
   <!-- Quick Actions -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     <a href="/input" class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg p-4 text-center transition">
@@ -199,7 +216,7 @@ const drawVictoryPointsChart = () => {
     
     <a href="/results/best-speakers" class="bg-purple-600 hover:bg-purple-700 text-white rounded-lg p-4 text-center transition">
       <div class="text-xl font-bold mb-2">Best Speaker</div>
-      <div class="text-sm">Lihat ranking best speaker</div>
+      <div class="text-sm">Lihat peringkat best speaker</div>
     </a>
     
     <a href="/results/rankings" class="bg-green-600 hover:bg-green-700 text-white rounded-lg p-4 text-center transition">
@@ -208,3 +225,53 @@ const drawVictoryPointsChart = () => {
     </a>
   </div>
 </BaseLayout>
+
+<script>
+  // Di sini kita taruh kode JavaScript yang butuh akses DOM
+  // Ini akan dijalankan pada sisi client (browser)
+  document.addEventListener('DOMContentLoaded', () => {
+    const buatGrafikVP = () => {
+      const containerGrafik = document.getElementById('victoryPointsChart');
+      
+      if (!containerGrafik) return;
+      
+      // Data untuk grafik
+      const timList = ['UCDS', 'Windi Wondo', 'Marjorie', 'Tutty Fruity', 'Prajurit'];
+      const dataVP = [18, 15, 14, 12, 10];
+      
+      // Buat grafik dengan representasi visual sederhana
+      const container = document.createElement('div');
+      container.class = 'flex items-end h-64 space-x-2 justify-center';
+      
+      timList.forEach((tim, index) => {
+        const tinggiMax = Math.max(...dataVP);
+        const tinggiBar = (dataVP[index] / tinggiMax) * 100;
+        
+        const bar = document.createElement('div');
+        bar.class = `w-24 bg-blue-500 rounded-t flex items-center justify-center`;
+        bar.style.height = `${tinggiBar}%`;
+        
+        const label = document.createElement('div');
+        label.class = 'text-xs text-center mt-2 font-medium';
+        label.textContent = tim;
+        
+        const valueLabel = document.createElement('div');
+        valueLabel.class = 'text-white text-center p-1 font-bold';
+        valueLabel.textContent = dataVP[index];
+        bar.appendChild(valueLabel);
+        
+        const barContainer = document.createElement('div');
+        barContainer.class = 'flex flex-col items-center';
+        barContainer.appendChild(bar);
+        barContainer.appendChild(label);
+        
+        container.appendChild(barContainer);
+      });
+      
+      containerGrafik.appendChild(container);
+    };
+    
+    // Jalankan fungsi untuk membuat grafik
+    buatGrafikVP();
+  });
+</script>
