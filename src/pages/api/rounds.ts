@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getCollections } from '../../../lib/mongodb.js';
+import { getCollections } from '../../../lib/mongodb';
 
 /**
  * API endpoint untuk menyimpan skor ronde debat
