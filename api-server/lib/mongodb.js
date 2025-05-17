@@ -6,6 +6,10 @@ dotenv.config();
 let client = null;
 let db = null;
 
+/**
+ * Connect to MongoDB database
+ * @author made by Tamaes
+ */
 export async function connectToDatabase() {
   if (db) {
     return db;
@@ -32,6 +36,10 @@ export async function connectToDatabase() {
   }
 }
 
+/**
+ * Close MongoDB connection
+ * @author made by Tamaes
+ */
 export async function closeConnection() {
   if (client) {
     await client.close();
@@ -41,6 +49,10 @@ export async function closeConnection() {
   }
 }
 
+/**
+ * Get all collections needed for the application
+ * @author made by Tamaes
+ */
 export async function getCollections() {
   const database = await connectToDatabase();
   

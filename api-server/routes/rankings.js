@@ -3,7 +3,10 @@ import { getCollections } from '../lib/mongodb.js';
 
 const router = express.Router();
 
-// GET - Get team rankings
+/**
+ * GET - Get team rankings based on Victory Points
+ * @author made by Tamaes
+ */
 router.get('/', async (req, res) => {
   try {
     const { teams } = await getCollections();

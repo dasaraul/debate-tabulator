@@ -3,7 +3,10 @@ import { getCollections } from '../lib/mongodb.js';
 
 const router = express.Router();
 
-// POST - Save round data
+/**
+ * POST - Save round data
+ * @author made by Tamaes
+ */
 router.post('/', async (req, res) => {
   try {
     const { rounds } = await getCollections();
@@ -45,7 +48,10 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET - Get all rounds
+/**
+ * GET - Get all rounds
+ * @author made by Tamaes
+ */
 router.get('/', async (req, res) => {
   try {
     const { rounds } = await getCollections();
@@ -65,7 +71,10 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Calculate rankings and Victory Points
+/**
+ * Calculate rankings and Victory Points
+ * @author made by Tamaes
+ */
 function calculateRankingsAndVP(scores) {
   const teams = Object.entries(scores).map(([position, teamData]) => {
     const speaker1Score = teamData.speakers[0].score || 0;
@@ -100,7 +109,10 @@ function calculateRankingsAndVP(scores) {
   });
 }
 
-// Update teams and speakers collections
+/**
+ * Update teams and speakers collections
+ * @author made by Tamaes
+ */
 async function updateTeamsAndSpeakers(roundData) {
   const { teams, speakers } = await getCollections();
   

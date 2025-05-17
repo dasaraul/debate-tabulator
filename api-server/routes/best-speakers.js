@@ -3,7 +3,10 @@ import { getCollections } from '../lib/mongodb.js';
 
 const router = express.Router();
 
-// GET - Get best speakers
+/**
+ * GET - Get best speaker rankings
+ * @author made by Tamaes
+ */
 router.get('/', async (req, res) => {
   try {
     const { speakers } = await getCollections();

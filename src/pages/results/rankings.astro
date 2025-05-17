@@ -2,229 +2,408 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 /**
- * Data dummy untuk perolehan Victory Points
+ * Halaman rankings dengan integrasi real-time MongoDB produksi
  * @author made by Tamaes
  */
-const vpData = [
-  { 
-    rank: 1,
-    team: "UCDS", 
-    university: "Universitas Ciputra Surabaya",
-    BP1: 3,
-    BP2: 2,
-    SF: 3,
-    F1: 2,
-    F2: 3,
-    F3: 3,
-    total: 16
-  },
-  { 
-    rank: 2,
-    team: "Windi Wondo", 
-    university: "Universitas Bunda Mulia",
-    BP1: 1,
-    BP2: 3,
-    SF: 2,
-    F1: 3,
-    F2: 1,
-    F3: 2,
-    total: 12
-  },
-  { 
-    rank: 3,
-    team: "Marjorie", 
-    university: "Universitas Diponegoro",
-    BP1: 2,
-    BP2: 0,
-    SF: 1,
-    F1: 1,
-    F2: 2,
-    F3: 0,
-    total: 6
-  },
-  { 
-    rank: 4,
-    team: "Tutty Fruity", 
-    university: "Universitas Indonesia",
-    BP1: 0,
-    BP2: 1,
-    SF: 0,
-    F1: 0,
-    F2: 0,
-    F3: 1,
-    total: 2
-  },
-  { 
-    rank: 5,
-    team: "Prajurit", 
-    university: "Universitas Trisakti",
-    BP1: 2,
-    BP2: 1,
-    SF: "-",
-    F1: "-",
-    F2: "-",
-    F3: "-",
-    total: 3
-  },
-  { 
-    rank: 6,
-    team: "Samudra", 
-    university: "Universitas Indonesia",
-    BP1: 1,
-    BP2: 0,
-    SF: "-",
-    F1: "-",
-    F2: "-",
-    F3: "-",
-    total: 1
-  },
-  { 
-    rank: 7,
-    team: "Viva la Vida", 
-    university: "Universitas Padjadjaran",
-    BP1: 0,
-    BP2: 0,
-    SF: "-",
-    F1: "-",
-    F2: "-",
-    F3: "-",
-    total: 0
-  },
-];
+let rankingsData = [];
+let error = null;
+
+// Deteksi environment dan return API URL yang benar
+const getApiUrl = () => {
+  const hostname = Astro.url.hostname;
+  const protocol = Astro.url.protocol;
+  
+  // Development
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://localhost:3001';
+  }
+  
+  // Production domain
+  if (hostname === 'debate-tabulator.jawanich.my.id') {
+    return `${protocol}//${hostname}/api`;
+  }
+  
+  // Server IP fallback
+  if (hostname === '128.199.164.94') {
+    return `${protocol}//${hostname}/api`;
+  }
+  
+  // Default
+  return `${protocol}//${hostname}/api`;
+};
+
+try {
+  const apiUrl = getApiUrl();
+  const endpoint = apiUrl.includes('/api') ? `${apiUrl}/rankings` : `${apiUrl}/api/rankings`;
+  
+  console.log(`Fetching rankings from: ${endpoint}`);
+  
+  const response = await fetch(endpoint);
+  const result = await response.json();
+  
+  if (result.success) {
+    rankingsData = result.data;
+    console.log(`✅ Loaded ${rankingsData.length} teams from MongoDB`);
+  } else {
+    error = result.error || 'Unknown error from API';
+    console.error('❌ API returned error:', error);
+  }
+} catch (err) {
+  error = err.message;
+  console.error('❌ Error fetching rankings:', err);
+}
+
+// Calculate qualifying teams
+const finalQualifiers = rankingsData.slice(0, 4);
+const semifinalQualifiers = rankingsData.slice(0, 8);
 ---
 
 <BaseLayout title="Ranking & Victory Points">
   <div class="bg-white p-6 rounded-lg shadow mb-6">
-    <h2 class="text-2xl font-bold mb-4">Victory Points Leaderboard</h2>
-    <p class="mb-6">
-      Victory Points (VP) diberikan berdasarkan peringkat tim pada setiap ronde:
-      <span class="font-semibold">Peringkat #1: 3 poin</span>,
-      <span class="font-semibold">Peringkat #2: 2 poin</span>,
-      <span class="font-semibold">Peringkat #3: 1 poin</span>,
-      <span class="font-semibold">Peringkat #4: 0 poin</span>
-    </p>
-    
-    <div class="overflow-x-auto">
-      <table class="min-w-full border">
-        <thead>
-          <tr class="bg-gray-100">
-            <th class="py-2 px-4 border text-left">Rank</th>
-            <th class="py-2 px-4 border text-left">Tim</th>
-            <th class="py-2 px-4 border text-left">Universitas</th>
-            <th class="py-2 px-4 border text-center">BP 1</th>
-            <th class="py-2 px-4 border text-center">BP 2</th>
-            <th class="py-2 px-4 border text-center">SF</th>
-            <th class="py-2 px-4 border text-center">Final 1</th>
-            <th class="py-2 px-4 border text-center">Final 2</th>
-            <th class="py-2 px-4 border text-center">Final 3</th>
-            <th class="py-2 px-4 border text-center font-bold">Total VP</th>
-          </tr>
-        </thead>
-        <tbody>
-          {vpData.map((team, index) => (
-            <tr class={index % 2 === 0 ? 'bg-gray-50' : ''}>
-              <td class="py-2 px-4 border">{team.rank}</td>
-              <td class="py-2 px-4 border font-medium">{team.team}</td>
-              <td class="py-2 px-4 border">{team.university}</td>
-              <td class="py-2 px-4 border text-center">{team.BP1}</td>
-              <td class="py-2 px-4 border text-center">{team.BP2}</td>
-              <td class="py-2 px-4 border text-center">{team.SF}</td>
-              <td class="py-2 px-4 border text-center">{team.F1}</td>
-              <td class="py-2 px-4 border text-center">{team.F2}</td>
-              <td class="py-2 px-4 border text-center">{team.F3}</td>
-              <td class="py-2 px-4 border text-center font-bold">{team.total}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-2xl font-bold">🏅 Victory Points Leaderboard</h2>
+      <div class="flex gap-2">
+        <button 
+          onclick="window.location.reload()" 
+          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+        >
+          🔄 Refresh Data
+        </button>
+        <a 
+          href="/input" 
+          class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+        >
+          ➕ Input Data Baru
+        </a>
+      </div>
     </div>
+    
+    {error ? (
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+        <h3 class="text-red-800 font-semibold mb-2">❌ Error Loading Rankings from MongoDB</h3>
+        <p class="text-red-700 mb-3">Error: {error}</p>
+        <div class="text-red-600 text-sm">
+          <p class="font-medium mb-2">Kemungkinan penyebab:</p>
+          <ul class="list-disc pl-5 space-y-1">
+            <li>API server tidak berjalan pada port 3001</li>
+            <li>Masalah koneksi MongoDB Atlas</li>
+            <li>Nginx proxy configuration error</li>
+            <li>CORS issues</li>
+            <li>Belum ada data yang diinput ke database</li>
+          </ul>
+          <p class="mt-3 font-medium">Solusi:</p>
+          <ul class="list-disc pl-5 space-y-1">
+            <li>Cek API: <code class="bg-red-100 px-1 rounded">curl https://debate-tabulator.jawanich.my.id/health</code></li>
+            <li>PM2 status: <code class="bg-red-100 px-1 rounded">pm2 status</code></li>
+            <li>Input data skor: <a href="/input" class="underline text-blue-600 font-medium">Input Skor →</a></li>
+          </ul>
+        </div>
+      </div>
+    ) : rankingsData.length === 0 ? (
+      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+        <h3 class="text-yellow-800 font-semibold mb-2">📭 Belum Ada Data Ranking</h3>
+        <p class="text-yellow-700 mb-2">MongoDB terhubung tapi belum ada data ranking tersedia.</p>
+        <div class="mt-3">
+          <a 
+            href="/input" 
+            class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition font-medium"
+          >
+            🚀 Input Data Skor Pertama
+          </a>
+        </div>
+      </div>
+    ) : (
+      <>
+        <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <h3 class="font-semibold mb-2">📊 Victory Points System:</h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div class="text-center p-2 bg-green-100 rounded">
+              <div class="font-bold text-green-800 text-lg">3 VP</div>
+              <div class="text-green-700">Peringkat #1</div>
+            </div>
+            <div class="text-center p-2 bg-blue-100 rounded">
+              <div class="font-bold text-blue-800 text-lg">2 VP</div>
+              <div class="text-blue-700">Peringkat #2</div>
+            </div>
+            <div class="text-center p-2 bg-yellow-100 rounded">
+              <div class="font-bold text-yellow-800 text-lg">1 VP</div>
+              <div class="text-yellow-700">Peringkat #3</div>
+            </div>
+            <div class="text-center p-2 bg-gray-100 rounded">
+              <div class="font-bold text-gray-800 text-lg">0 VP</div>
+              <div class="text-gray-700">Peringkat #4</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mb-4 bg-green-50 border border-green-200 rounded-lg p-3">
+          <div class="flex items-center justify-between">
+            <p class="text-green-800 text-sm">
+              ✅ Data loaded from <strong>MongoDB Atlas</strong> • 
+              Total teams: <strong>{rankingsData.length}</strong>
+            </p>
+            <p class="text-green-700 text-xs">
+              Updated: <strong>{new Date().toLocaleString()}</strong>
+            </p>
+          </div>
+        </div>
+        
+        <div class="overflow-x-auto">
+          <table class="min-w-full border">
+            <thead>
+              <tr class="bg-gray-100">
+                <th class="py-2 px-4 border text-left">Rank</th>
+                <th class="py-2 px-4 border text-left">Tim</th>
+                <th class="py-2 px-4 border text-left">Universitas</th>
+                <th class="py-2 px-4 border text-center">Total VP</th>
+                <th class="py-2 px-4 border text-center">Ronde</th>
+                <th class="py-2 px-4 border text-center">VP Details</th>
+                <th class="py-2 px-4 border text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rankingsData.map((team, index) => (
+                <tr class={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-blue-50 transition
+                  ${index < 4 ? 'border-l-4 border-green-400' : 
+                    index < 8 ? 'border-l-4 border-blue-400' : 'border-l-4 border-gray-300'}`}>
+                  <td class="py-3 px-4 border">
+                    <span class={`
+                      inline-flex items-center justify-center w-8 h-8 rounded-full font-bold
+                      ${index === 0 ? 'bg-yellow-400 text-yellow-900 shadow-lg' : 
+                        index === 1 ? 'bg-gray-400 text-white shadow-md' : 
+                        index === 2 ? 'bg-amber-600 text-white shadow-md' : 
+                        index < 4 ? 'bg-green-500 text-white' :
+                        index < 8 ? 'bg-blue-500 text-white' :
+                        'bg-gray-200 text-gray-700'}
+                    `}>
+                      {team.rank}
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 border font-medium">{team.name}</td>
+                  <td class="py-3 px-4 border text-sm">{team.university}</td>
+                  <td class="py-3 px-4 border text-center font-bold text-lg text-green-600">{team.totalVP}</td>
+                  <td class="py-3 px-4 border text-center">
+                    <span class="bg-gray-100 text-gray-800 text-sm px-2 py-1 rounded">
+                      {team.roundsCount}
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 border text-center">
+                    <div class="flex justify-center flex-wrap gap-1">
+                      {team.rounds.map((round, idx) => (
+                        <span key={idx} class={`
+                          text-xs px-2 py-1 rounded 
+                          ${round.vp === 3 ? 'bg-green-100 text-green-800' :
+                            round.vp === 2 ? 'bg-blue-100 text-blue-800' :
+                            round.vp === 1 ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-gray-100 text-gray-800'}
+                        `} title={`${round.round}: ${round.vp} Victory Points`}>
+                          {round.round}: {round.vp}VP
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                  <td class="py-3 px-4 border text-center">
+                    {index < 4 ? (
+                      <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
+                        🏆 Final
+                      </span>
+                    ) : index < 8 ? (
+                      <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium">
+                        🔥 Semifinal
+                      </span>
+                    ) : (
+                      <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
+                        Eliminated
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </>
+    )}
   </div>
   
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <!-- Top 3 Visualization -->
-    <div class="md:col-span-2 bg-white p-6 rounded-lg shadow">
-      <h2 class="text-xl font-bold mb-4">Top 3 Tim</h2>
+  {rankingsData.length > 0 && (
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Top 3 Podium -->
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-bold mb-4">🏆 Top 3 Tim</h2>
+        
+        {rankingsData.length >= 3 ? (
+          <div class="flex justify-center items-end space-x-8 h-64 my-8">
+            <!-- Second Place -->
+            <div class="flex flex-col items-center">
+              <div class="text-center mb-2">
+                <div class="text-lg font-bold">{rankingsData[1].name}</div>
+                <div class="text-sm text-gray-600">{rankingsData[1].university}</div>
+              </div>
+              <div class="w-32 bg-gray-400 h-48 flex flex-col items-center justify-center text-white rounded-t-lg shadow-lg">
+                <div class="text-2xl font-bold">{rankingsData[1].totalVP}</div>
+                <div class="text-sm">VP</div>
+              </div>
+              <div class="bg-gray-200 w-32 py-2 text-center rounded-b-lg">
+                <div class="font-medium">🥈 2nd Place</div>
+                <div class="text-xs text-gray-600">{rankingsData[1].roundsCount} rounds</div>
+              </div>
+            </div>
+            
+            <!-- First Place -->
+            <div class="flex flex-col items-center">
+              <div class="text-center mb-2">
+                <div class="text-lg font-bold">{rankingsData[0].name}</div>
+                <div class="text-sm text-gray-600">{rankingsData[0].university}</div>
+              </div>
+              <div class="w-32 bg-yellow-500 h-64 flex flex-col items-center justify-center text-white rounded-t-lg shadow-xl">
+                <div class="text-3xl font-bold">{rankingsData[0].totalVP}</div>
+                <div class="text-sm">VP</div>
+              </div>
+              <div class="bg-yellow-200 w-32 py-2 text-center rounded-b-lg">
+                <div class="font-bold text-yellow-800">🏆 Champion</div>
+                <div class="text-xs text-yellow-700">{rankingsData[0].roundsCount} rounds</div>
+              </div>
+            </div>
+            
+            <!-- Third Place -->
+            <div class="flex flex-col items-center">
+              <div class="text-center mb-2">
+                <div class="text-lg font-bold">{rankingsData[2].name}</div>
+                <div class="text-sm text-gray-600">{rankingsData[2].university}</div>
+              </div>
+              <div class="w-32 bg-amber-600 h-36 flex flex-col items-center justify-center text-white rounded-t-lg shadow-lg">
+                <div class="text-2xl font-bold">{rankingsData[2].totalVP}</div>
+                <div class="text-sm">VP</div>
+              </div>
+              <div class="bg-amber-200 w-32 py-2 text-center rounded-b-lg">
+                <div class="font-medium">🥉 3rd Place</div>
+                <div class="text-xs text-amber-700">{rankingsData[2].roundsCount} rounds</div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <p class="text-gray-500 text-center py-8">Belum cukup data untuk menampilkan podium</p>
+        )}
+      </div>
       
-      <div class="flex justify-center items-end space-x-8 h-64 my-8">
-        <!-- Second Place -->
-        <div class="flex flex-col items-center">
-          <div class="text-lg font-bold">{vpData[1].team}</div>
-          <div class="w-32 bg-silver h-48 flex items-center justify-center text-white text-2xl font-bold rounded-t-lg">
-            {vpData[1].total}
-          </div>
-          <div class="bg-gray-200 w-32 py-2 text-center rounded-b-lg">2nd</div>
-        </div>
+      <!-- Tournament Progress & Statistics -->
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-bold mb-4">📊 Tournament Progress</h2>
         
-        <!-- First Place -->
-        <div class="flex flex-col items-center">
-          <div class="text-lg font-bold">{vpData[0].team}</div>
-          <div class="w-32 bg-gold h-64 flex items-center justify-center text-white text-2xl font-bold rounded-t-lg">
-            {vpData[0].total}
+        <div class="space-y-4">
+          {finalQualifiers.length > 0 && (
+            <div class="p-4 bg-green-50 border border-green-200 rounded">
+              <h3 class="font-semibold mb-2 text-green-800">🏆 Final Qualifiers</h3>
+              <div class="text-sm text-green-700 mb-2">
+                Total: <strong>{finalQualifiers.length} tim</strong>
+              </div>
+              <div class="grid grid-cols-1 gap-1">
+                {finalQualifiers.map(team => (
+                  <div class="flex items-center justify-between bg-green-100 p-2 rounded text-sm">
+                    <span class="font-medium">{team.name}</span>
+                    <span class="text-green-800 font-bold">{team.totalVP} VP</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {semifinalQualifiers.length > 4 && (
+            <div class="p-4 bg-blue-50 border border-blue-200 rounded">
+              <h3 class="font-semibold mb-2 text-blue-800">🔥 Semifinal Qualifiers</h3>
+              <div class="text-sm text-blue-700 mb-2">
+                Total: <strong>{Math.min(8, semifinalQualifiers.length)} tim</strong>
+              </div>
+              <div class="grid grid-cols-1 gap-1">
+                {semifinalQualifiers.slice(4, 8).map(team => (
+                  <div class="flex items-center justify-between bg-blue-100 p-2 rounded text-sm">
+                    <span class="font-medium">{team.name}</span>
+                    <span class="text-blue-800 font-bold">{team.totalVP} VP</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          <div class="p-4 bg-gray-50 border border-gray-200 rounded">
+            <h3 class="font-semibold mb-3">📈 Tournament Statistics</h3>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+              <div class="bg-white p-3 rounded shadow-sm">
+                <div class="text-gray-600">Total Teams</div>
+                <div class="text-2xl font-bold text-blue-600">{rankingsData.length}</div>
+              </div>
+              <div class="bg-white p-3 rounded shadow-sm">
+                <div class="text-gray-600">Avg Rounds</div>
+                <div class="text-2xl font-bold text-green-600">
+                  {rankingsData.length > 0 ? 
+                    (rankingsData.reduce((sum, team) => sum + team.roundsCount, 0) / rankingsData.length).toFixed(1) 
+                    : '0'
+                  }
+                </div>
+              </div>
+              <div class="bg-white p-3 rounded shadow-sm">
+                <div class="text-gray-600">Highest VP</div>
+                <div class="text-2xl font-bold text-purple-600">
+                  {rankingsData.length > 0 ? Math.max(...rankingsData.map(t => t.totalVP)) : '0'}
+                </div>
+              </div>
+              <div class="bg-white p-3 rounded shadow-sm">
+                <div class="text-gray-600">Active Teams</div>
+                <div class="text-2xl font-bold text-orange-600">
+                  {rankingsData.filter(t => t.roundsCount > 0).length}
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="bg-gray-200 w-32 py-2 text-center rounded-b-lg">1st</div>
-        </div>
-        
-        <!-- Third Place -->
-        <div class="flex flex-col items-center">
-          <div class="text-lg font-bold">{vpData[2].team}</div>
-          <div class="w-32 bg-bronze h-36 flex items-center justify-center text-white text-2xl font-bold rounded-t-lg">
-            {vpData[2].total}
-          </div>
-          <div class="bg-gray-200 w-32 py-2 text-center rounded-b-lg">3rd</div>
         </div>
       </div>
     </div>
-    
-    <!-- Final Qualification -->
-    <div class="bg-white p-6 rounded-lg shadow">
-      <h2 class="text-xl font-bold mb-4">Kualifikasi Final</h2>
-      
-      <div class="space-y-4">
-        <div class="p-4 bg-blue-50 border border-blue-200 rounded">
-          <h3 class="font-semibold mb-2">Babak Final</h3>
-          <ul class="space-y-2">
-            {vpData.slice(0, 4).map(team => (
-              <li class="flex items-center">
-                <span class="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-xs mr-2">✓</span>
-                <span>{team.team} ({team.total} VP)</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        
-        <div class="p-4 bg-gray-50 border border-gray-200 rounded">
-          <h3 class="font-semibold mb-2">Semifinal</h3>
-          <ul class="space-y-2">
-            {vpData.slice(0, 4).map(team => (
-              <li class="flex items-center">
-                <span class="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-xs mr-2">✓</span>
-                <span>{team.team} ({team.total} VP)</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        
-        <div class="p-4 bg-gray-50 border border-gray-200 rounded opacity-60">
-          <h3 class="font-semibold mb-2">16 Besar</h3>
-          <p class="text-sm text-gray-600">
-            {vpData.length} tim berkompetisi dengan format British Parliamentary
-          </p>
-        </div>
-      </div>
+  )}
+  
+  <!-- System Info -->
+  <div class="bg-blue-50 p-4 rounded-lg border border-blue-200 mt-6">
+    <h3 class="font-semibold mb-2">🔗 Production System Info:</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+      <ul class="list-disc pl-5 space-y-1">
+        <li>Data source: <strong>MongoDB Atlas (Production)</strong></li>
+        <li>API server: <strong>Express.js (Port 3001)</strong></li>
+        <li>Domain: <strong>debate-tabulator.jawanich.my.id</strong></li>
+        <li>Total VP dihitung dari akumulasi semua ronde</li>
+      </ul>
+      <ul class="list-disc pl-5 space-y-1">
+        <li>Peringkat berdasarkan Total VP → jumlah ronde</li>
+        <li>Border hijau = Final, biru = Semifinal</li>
+        <li>API Endpoint: <code class="bg-blue-100 px-1 rounded">/api/rankings</code></li>
+        <li>Auto-update dengan input skor baru</li>
+      </ul>
     </div>
   </div>
 </BaseLayout>
 
-<style>
-  .bg-gold {
-    background-color: #FFD700;
-  }
+<script is:inline>
+  /**
+   * Console logging dan optional auto-refresh
+   * @author made by Tamaes
+   */
   
-  .bg-silver {
-    background-color: #C0C0C0;
-  }
+  // Tampilkan informasi koneksi di console
+  console.log('🏅 Rankings Page Loaded');
+  console.log('🔗 Current domain:', window.location.hostname);
+  console.log('📡 API calls will be made to:', window.location.hostname === 'localhost' ? 'localhost:3001' : window.location.hostname + '/api');
   
-  .bg-bronze {
-    background-color: #CD7F32;
-  }
-</style>
+  // Function untuk manual refresh
+  window.refreshData = function() {
+    console.log('🔄 Manual refresh triggered');
+    window.location.reload();
+  };
+  
+  // Optional: Auto-refresh every 3 minutes
+  // Uncomment untuk enable auto-refresh
+  /*
+  setInterval(() => {
+    console.log('🔄 Auto-refreshing rankings data...');
+    window.location.reload();
+  }, 180000); // 3 minutes
+  */
+</script>
