@@ -1,5 +1,9 @@
 import React from 'react';
 
+/**
+ * Komponen untuk menampilkan tabel peringkat best speaker
+ * @author made by Tamaes
+ */
 const BestSpeakerTable = ({ speakerData }) => {
   if (!speakerData || speakerData.length === 0) {
     return <p>Belum ada data best speaker tersedia.</p>;

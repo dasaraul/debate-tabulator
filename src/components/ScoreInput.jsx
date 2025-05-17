@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { calculateTeamAverage } from '../utils/scoreCalculations';
 
+/**
+ * Komponen untuk input skor debat
+ * Memungkinkan pengguna memasukkan informasi tentang ronde, room, mosi, dan skor tim
+ * @author made by Tamaes
+ */
 const ScoreInput = ({ onSave }) => {
   const [round, setRound] = useState('BP 1');
   const [room, setRoom] = useState('Room A');
@@ -44,11 +49,14 @@ const ScoreInput = ({ onSave }) => {
     }
   });
 
+  /**
+   * Memperbarui skor pembicara dan menghitung skor tim secara otomatis
+   * @author made by Tamaes
+   */
   const updateSpeakerScore = (position, speakerIndex, value) => {
     const newScores = {...scores};
     newScores[position].speakers[speakerIndex].score = parseInt(value);
     
-    // Menghitung skor tim otomatis seperti di Excel
     const speaker1Score = newScores[position].speakers[0].score || 0;
     const speaker2Score = newScores[position].speakers[1].score || 0;
     newScores[position].teamScore = calculateTeamAverage(speaker1Score, speaker2Score);
@@ -56,12 +64,20 @@ const ScoreInput = ({ onSave }) => {
     setScores(newScores);
   };
 
+  /**
+   * Memperbarui informasi tim (nama tim dan universitas)
+   * @author made by Tamaes
+   */
   const updateTeamInfo = (position, field, value) => {
     const newScores = {...scores};
     newScores[position][field] = value;
     setScores(newScores);
   };
 
+  /**
+   * Menangani submit form
+   * @author made by Tamaes
+   */
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave({ round, room, motion, scores });

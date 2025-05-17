@@ -1,5 +1,9 @@
 import React from 'react';
 
+/**
+ * Komponen untuk menampilkan scorecard debat dalam format PDF
+ * @author made by Tamaes
+ */
 const ScorecardPDF = ({ round, room, motion, judge, teams }) => {
   return (
     <div class="p-8 bg-white rounded-lg shadow max-w-3xl mx-auto border-2 border-gray-300 print:border-none">

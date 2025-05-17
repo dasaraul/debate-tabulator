@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
 import { calculateBestSpeaker } from '../utils/scoreCalculations';
 
+/**
+ * Komponen dashboard untuk menampilkan peringkat best speaker
+ * dengan fitur filter dan pencarian
+ * @author made by Tamaes
+ */
 const BestSpeakerDashboard = ({ speakerData }) => {
   const [filterRound, setFilterRound] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Memfilter data speaker berdasarkan ronde dan pencarian
+  /**
+   * Filter data speaker berdasarkan ronde dan kriteria pencarian
+   * @author made by Tamaes
+   */
   const filteredSpeakers = speakerData.filter(speaker => {
     // Filter berdasarkan pencarian
     const matchesQuery = speaker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -20,7 +28,10 @@ const BestSpeakerDashboard = ({ speakerData }) => {
     }
   });
   
-  // Mengambil semua ronde yang ada
+  /**
+   * Mendapatkan semua ronde yang tersedia dari data speaker
+   * @author made by Tamaes
+   */
   const availableRounds = ['all'];
   speakerData.forEach(speaker => {
     Object.keys(speaker.scores).forEach(round => {

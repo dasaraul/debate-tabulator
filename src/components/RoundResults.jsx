@@ -1,5 +1,10 @@
 import React from 'react';
 
+/**
+ * Komponen untuk menampilkan tabel hasil ronde debat
+ * dengan detail tim, speaker, skor, dan victory points
+ * @author made by Tamaes
+ */
 const RoundResults = ({ roundData }) => {
   if (!roundData || !roundData.results) {
     return <div>Tidak ada data untuk ditampilkan</div>;

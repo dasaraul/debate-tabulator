@@ -1,6 +1,10 @@
 ---
 const currentPath = Astro.url.pathname;
 
+/**
+ * Konfigurasi item menu navigasi
+ * @author made by Tamaes
+ */
 const menuItems = [
   { href: '/', label: 'Home', icon: 'home' },
   { href: '/input', label: 'Input Skor', icon: 'edit' },
@@ -9,6 +13,10 @@ const menuItems = [
   { href: '/settings', label: 'Pengaturan', icon: 'cog' }
 ];
 
+/**
+ * Fungsi untuk menentukan apakah menu aktif berdasarkan path saat ini
+ * @author made by Tamaes
+ */
 const isActive = (href: string) => {
   if (href === '/') {
     return currentPath === '/';

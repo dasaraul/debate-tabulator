@@ -1,7 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 
-// Data dummy untuk ruangan dan tim
+/**
+ * Data dummy untuk ruangan dan tim
+ * @author made by Tamaes
+ */
 const dataRuangan = {
   rooms: [
     { name: "Ruangan A", status: "BP 1 Selesai", teams: ["UCDS", "Marjorie", "Viva la Vida", "Moonlight"] },
@@ -11,7 +14,10 @@ const dataRuangan = {
   ]
 };
 
-// Data dummy untuk hasil VP
+/**
+ * Data dummy untuk hasil VP
+ * @author made by Tamaes
+ */
 const hasilVP = [
   { team: "UCDS", vp: 18, rounds: ["BP 1", "BP 2", "Semifinal"] },
   { team: "Windi Wondo", vp: 15, rounds: ["BP 1", "BP 2", "Semifinal"] },
@@ -23,7 +29,10 @@ const hasilVP = [
   { team: "Garuda", vp: 5, rounds: ["BP 1"] },
 ];
 
-// Status progres turnamen
+/**
+ * Status progres turnamen
+ * @author made by Tamaes
+ */
 const progressTurnamen = {
   currentRound: "Semifinal",
   completed: ["BP 1", "BP 2"],
@@ -32,7 +41,10 @@ const progressTurnamen = {
   remainingTeams: 4
 };
 
-// Data contoh perhitungan VP
+/**
+ * Data contoh perhitungan VP
+ * @author made by Tamaes
+ */
 const contohPerhitunganVP = {
   round: "BP 1, Ruangan A",
   teams: [
@@ -227,8 +239,10 @@ const contohPerhitunganVP = {
 </BaseLayout>
 
 <script>
-  // Di sini kita taruh kode JavaScript yang butuh akses DOM
-  // Ini akan dijalankan pada sisi client (browser)
+  /**
+   * Membuat grafik VP menggunakan DOM
+   * @author made by Tamaes
+   */
   document.addEventListener('DOMContentLoaded', () => {
     const buatGrafikVP = () => {
       const containerGrafik = document.getElementById('victoryPointsChart');

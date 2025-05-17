@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { hitungRataRataTim, tentukanVictoryPoints } from '../utils/scoreCalculations';
 
+/**
+ * Komponen untuk mendemonstrasikan perhitungan Victory Points dengan penanganan seri (tie)
+ * Memungkinkan pengguna untuk mencoba metode penanganan seri yang berbeda
+ * @author made by Tamaes
+ */
 const PerhitunganVPSeri = () => {
   const [metodeHandlingSeri, setMetodeHandlingSeri] = useState('split');
   const [skorPembicara, setSkorPembicara] = useState({
@@ -12,7 +17,10 @@ const PerhitunganVPSeri = () => {
   
   const [hasilPerhitungan, setHasilPerhitungan] = useState(null);
   
-  // Hitung VP berdasarkan input user dengan penanganan seri
+  /**
+   * Menghitung VP berdasarkan input user dengan penanganan seri
+   * @author made by Tamaes
+   */
   const hitungVP = () => {
     // Membuat array tim dari nilai input
     const timArray = [
@@ -59,7 +67,10 @@ const PerhitunganVPSeri = () => {
     setHasilPerhitungan(hasilDenganVP);
   };
   
-  // Handler untuk perubahan nilai input
+  /**
+   * Handler untuk perubahan nilai input skor pembicara
+   * @author made by Tamaes
+   */
   const handleSkorChange = (posisi, index, nilai) => {
     setSkorPembicara(prev => {
       const skorBaru = { ...prev };

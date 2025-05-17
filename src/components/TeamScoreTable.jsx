@@ -1,5 +1,9 @@
 import React from 'react';
 
+/**
+ * Komponen untuk menampilkan tabel skor tim dalam suatu ronde
+ * @author made by Tamaes
+ */
 const TeamScoreTable = ({ roundData }) => {
   if (!roundData || !roundData.results || roundData.results.length === 0) {
     return <p>Belum ada data tersedia.</p>;
