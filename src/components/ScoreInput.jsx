@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 /**
- * Komponen untuk input skor debat dengan koneksi ke MongoDB
+ * Komponen untuk input skor debat dengan koneksi ke API server
  * @author made by Tamaes
  */
 const ScoreInput = ({ onSave }) => {
@@ -48,6 +48,22 @@ const ScoreInput = ({ onSave }) => {
     }
   });
 
+  // API base URL - detects environment
+  const getApiUrl = () => {
+    if (typeof window !== 'undefined') {
+      const isDev = window.location.hostname === 'localhost';
+      const protocol = window.location.protocol;
+      const hostname = window.location.hostname;
+      
+      if (isDev) {
+        return 'http://localhost:3001';
+      } else {
+        return `${protocol}//${hostname}:3001`;
+      }
+    }
+    return 'http://localhost:3001';
+  };
+
   /**
    * Memperbarui skor pembicara dan menghitung skor tim secara otomatis
    * @author made by Tamaes
@@ -74,7 +90,7 @@ const ScoreInput = ({ onSave }) => {
   };
 
   /**
-   * Menangani submit form dan menyimpan ke MongoDB
+   * Menangani submit form dan menyimpan ke API server
    * @author made by Tamaes
    */
   const handleSubmit = async (e) => {
@@ -83,8 +99,9 @@ const ScoreInput = ({ onSave }) => {
     
     try {
       const dataToSave = { round, room, motion, scores };
+      const apiUrl = getApiUrl();
       
-      const response = await fetch('/api/rounds', {
+      const response = await fetch(`${apiUrl}/api/rounds`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +112,7 @@ const ScoreInput = ({ onSave }) => {
       const result = await response.json();
 
       if (response.ok) {
-        alert('Data berhasil disimpan ke database!');
+        alert('✅ Data berhasil disimpan ke database!');
         // Reset form
         setScores({
           OG: { teamName: '', university: '', speakers: [{ position: 'PM', name: '', score: 0 }, { position: 'DPM', name: '', score: 0 }], teamScore: 0 },
@@ -103,13 +120,16 @@ const ScoreInput = ({ onSave }) => {
           CG: { teamName: '', university: '', speakers: [{ position: 'MG', name: '', score: 0 }, { position: 'GW', name: '', score: 0 }], teamScore: 0 },
           CO: { teamName: '', university: '', speakers: [{ position: 'MO', name: '', score: 0 }, { position: 'OW', name: '', score: 0 }], teamScore: 0 }
         });
+        setRound('BP 1');
+        setRoom('Room A');
+        setMotion('This House believes...');
         if (onSave) onSave(result);
       } else {
-        alert(`Error: ${result.error}`);
+        alert(`❌ Error: ${result.error || 'Failed to save data'}`);
       }
     } catch (error) {
       console.error('Error saving data:', error);
-      alert('Gagal menyimpan data. Periksa koneksi internet.');
+      alert('❌ Gagal menghubungi server. Periksa koneksi internet dan pastikan API server berjalan.');
     } finally {
       setLoading(false);
     }
@@ -122,7 +142,7 @@ const ScoreInput = ({ onSave }) => {
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div>
-            <label className="block mb-1">Ronde</label>
+            <label className="block mb-1">Ronde *</label>
             <select 
               className="w-full p-2 border rounded"
               value={round}
@@ -139,7 +159,7 @@ const ScoreInput = ({ onSave }) => {
           </div>
           
           <div>
-            <label className="block mb-1">Room</label>
+            <label className="block mb-1">Room *</label>
             <input 
               type="text" 
               className="w-full p-2 border rounded"
@@ -150,7 +170,7 @@ const ScoreInput = ({ onSave }) => {
           </div>
           
           <div>
-            <label className="block mb-1">Mosi</label>
+            <label className="block mb-1">Mosi *</label>
             <input 
               type="text" 
               className="w-full p-2 border rounded"
@@ -161,7 +181,7 @@ const ScoreInput = ({ onSave }) => {
           </div>
         </div>
         
-        {/* Rendering untuk setiap posisi (OG, OO, CG, CO) */}
+        {/* Form for each position */}
         {Object.entries(scores).map(([position, data]) => (
           <div key={position} className="mb-8 p-4 border rounded">
             <h3 className="text-lg font-semibold mb-2">{position}</h3>
@@ -228,28 +248,37 @@ const ScoreInput = ({ onSave }) => {
                   value={data.teamScore.toFixed(2)}
                 />
                 <div className="text-xs text-gray-500 mt-1">
-                  Dihitung otomatis
+                  Dihitung otomatis dari rata-rata 2 speaker
                 </div>
               </div>
             </div>
           </div>
         ))}
         
-        <button 
-          type="submit"
-          disabled={loading}
-          className={`px-6 py-3 rounded-lg text-white font-medium ${
-            loading 
-              ? 'bg-gray-400 cursor-not-allowed' 
-              : 'bg-blue-600 hover:bg-blue-700'
-          }`}
-        >
-          {loading ? 'Menyimpan...' : 'Simpan Hasil'}
-        </button>
+        <div className="flex items-center gap-4">
+          <button 
+            type="submit"
+            disabled={loading}
+            className={`px-6 py-3 rounded-lg text-white font-medium ${
+              loading 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-blue-600 hover:bg-blue-700'
+            }`}
+          >
+            {loading ? 'Menyimpan...' : 'Simpan ke Database'}
+          </button>
+          
+          {loading && (
+            <div className="text-blue-600">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+            </div>
+          )}
+        </div>
         
         <div className="mt-4 text-sm text-gray-600">
           <p>* = Field wajib diisi</p>
-          <p>Data akan disimpan ke database MongoDB</p>
+          <p>💾 Data akan disimpan ke MongoDB melalui API server</p>
+          <p>🔄 Ranking dan Victory Points dihitung otomatis</p>
         </div>
       </form>
     </div>
