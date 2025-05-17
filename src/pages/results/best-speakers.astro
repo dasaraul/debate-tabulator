@@ -1,72 +1,177 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import BestSpeakerTable from '../../components/BestSpeakerTable.jsx';
 
 /**
- * Contoh data dummy untuk best speaker
+ * Halaman hasil best speaker yang mengambil data dari MongoDB
  * @author made by Tamaes
  */
-const bestSpeakerData = [
-  {
-    name: "Candra Giga Kharisma",
-    team: "UCDS",
-    university: "Universitas Ciputra Surabaya",
-    scores: [76, 79, 75, 74, 76, 77],
-    totalScore: 457,
-    average: 76.17
-  },
-  {
-    name: "Steven Adi Santoso",
-    team: "UCDS",
-    university: "Universitas Ciputra Surabaya",
-    scores: [76, 80, 74, 75, 77, 76],
-    totalScore: 458,
-    average: 76.33
-  },
-  {
-    name: "Charlene Chie Putri",
-    team: "Windi Wondo",
-    university: "Universitas Bunda Mulia",
-    scores: [75, 77, 78, 74, 74, 77],
-    totalScore: 455,
-    average: 75.83
-  },
-  {
-    name: "Thalia Zefanya",
-    team: "Windi Wondo",
-    university: "Universitas Bunda Mulia",
-    scores: [75, 78, 75, 75, 78, 77],
-    totalScore: 458,
-    average: 76.33
-  },
-  {
-    name: "Putriku Salmaku",
-    team: "Marjorie",
-    university: "Universitas Diponegoro",
-    scores: [74, 75, 73, 76, 74, 74],
-    totalScore: 446,
-    average: 74.33
+let bestSpeakerData = [];
+let error = null;
+
+try {
+  // Fetch data dari API
+  const apiUrl = `${Astro.url.origin}/api/best-speakers`;
+  const response = await fetch(apiUrl);
+  const result = await response.json();
+  
+  if (result.success) {
+    bestSpeakerData = result.data;
+  } else {
+    error = result.error;
   }
-];
+} catch (err) {
+  error = err.message;
+  console.error('Error fetching best speakers:', err);
+}
 ---
 
 <BaseLayout title="Best Speaker">
   <div class="bg-white p-6 rounded-lg shadow mb-8">
-    <h2 class="text-2xl font-bold mb-4">Hasil Best Speaker</h2>
-    <p class="mb-6">
-      Berikut adalah ranking best speaker berdasarkan akumulasi nilai dari seluruh ronde.
-      Nilai dihitung berdasarkan rata-rata skor individu dari setiap ronde.
-    </p>
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-2xl font-bold">Hasil Best Speaker</h2>
+      <button 
+        onclick="window.location.reload()" 
+        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+      >
+        Refresh Data
+      </button>
+    </div>
     
-    <BestSpeakerTable speakerData={bestSpeakerData} client:load />
+    {error ? (
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+        <h3 class="text-red-800 font-semibold mb-2">Error Loading Data</h3>
+        <p class="text-red-700">{error}</p>
+        <p class="text-red-600 text-sm mt-2">Pastikan koneksi database aktif dan coba refresh halaman.</p>
+      </div>
+    ) : bestSpeakerData.length === 0 ? (
+      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+        <h3 class="text-yellow-800 font-semibold mb-2">No Data Available</h3>
+        <p class="text-yellow-700">Belum ada data best speaker tersedia.</p>
+        <p class="text-yellow-600 text-sm mt-2">Silakan input data skor terlebih dahulu.</p>
+      </div>
+    ) : (
+      <>
+        <p class="mb-6">
+          Berikut adalah ranking best speaker berdasarkan akumulasi nilai dari seluruh ronde.
+          Data diambil secara real-time dari database.
+        </p>
+        
+        <div class="overflow-x-auto">
+          <table class="min-w-full bg-white border">
+            <thead>
+              <tr class="bg-gray-100">
+                <th class="py-3 px-4 border text-left">Rank</th>
+                <th class="py-3 px-4 border text-left">Nama</th>
+                <th class="py-3 px-4 border text-left">Tim</th>
+                <th class="py-3 px-4 border text-left">Universitas</th>
+                <th class="py-3 px-4 border text-left">Total Skor</th>
+                <th class="py-3 px-4 border text-left">Rata-Rata</th>
+                <th class="py-3 px-4 border text-left">Jumlah Ronde</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bestSpeakerData.map((speaker, index) => (
+                <tr key={speaker._id} class={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                  <td class="py-3 px-4 border">
+                    <span class={`
+                      inline-flex items-center justify-center w-8 h-8 rounded-full font-bold
+                      ${index === 0 ? 'bg-yellow-400 text-yellow-900' : 
+                        index === 1 ? 'bg-gray-400 text-white' : 
+                        index === 2 ? 'bg-amber-600 text-white' : 
+                        'bg-gray-200 text-gray-700'}
+                    `}>
+                      {speaker.rank}
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 border font-medium">{speaker.name}</td>
+                  <td class="py-3 px-4 border">{speaker.team}</td>
+                  <td class="py-3 px-4 border">{speaker.university}</td>
+                  <td class="py-3 px-4 border font-bold text-lg">{speaker.totalScore}</td>
+                  <td class="py-3 px-4 border">{speaker.averageScore}</td>
+                  <td class="py-3 px-4 border">{speaker.roundsCount}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Top 3 Visualization -->
+        {bestSpeakerData.length >= 3 && (
+          <div class="mt-12">
+            <h3 class="text-xl font-semibold mb-6">Top 3 Best Speaker</h3>
+            
+            <div class="flex justify-center items-end space-x-8">
+              <!-- Second Place -->
+              <div class="flex flex-col items-center">
+                <div class="text-lg font-bold mb-2">{bestSpeakerData[1].name}</div>
+                <div class="text-sm text-gray-600 mb-4">{bestSpeakerData[1].team}</div>
+                <div class="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mb-4">
+                  <span class="text-gray-600 text-xl font-bold">2</span>
+                </div>
+                <div class="w-32 bg-gray-400 h-48 flex items-center justify-center text-white text-2xl font-bold rounded-t-lg">
+                  {bestSpeakerData[1].totalScore}
+                </div>
+                <div class="bg-gray-200 w-32 py-3 text-center rounded-b-lg font-medium">
+                  Runner Up
+                  <div class="text-xs text-gray-600">Avg: {bestSpeakerData[1].averageScore}</div>
+                </div>
+              </div>
+              
+              <!-- First Place -->
+              <div class="flex flex-col items-center">
+                <div class="text-lg font-bold mb-2">{bestSpeakerData[0].name}</div>
+                <div class="text-sm text-gray-600 mb-4">{bestSpeakerData[0].team}</div>
+                <div class="w-32 h-32 rounded-full bg-yellow-100 border-4 border-yellow-400 flex items-center justify-center mb-4">
+                  <span class="text-yellow-600 text-2xl font-bold">1</span>
+                </div>
+                <div class="w-32 bg-yellow-500 h-64 flex items-center justify-center text-white text-2xl font-bold rounded-t-lg">
+                  {bestSpeakerData[0].totalScore}
+                </div>
+                <div class="bg-yellow-200 w-32 py-3 text-center rounded-b-lg font-medium">
+                  Best Speaker
+                  <div class="text-xs text-yellow-700">Avg: {bestSpeakerData[0].averageScore}</div>
+                </div>
+              </div>
+              
+              <!-- Third Place -->
+              <div class="flex flex-col items-center">
+                <div class="text-lg font-bold mb-2">{bestSpeakerData[2].name}</div>
+                <div class="text-sm text-gray-600 mb-4">{bestSpeakerData[2].team}</div>
+                <div class="w-20 h-20 rounded-full bg-orange-100 flex items-center justify-center mb-4">
+                  <span class="text-orange-600 text-lg font-bold">3</span>
+                </div>
+                <div class="w-32 bg-orange-400 h-32 flex items-center justify-center text-white text-2xl font-bold rounded-t-lg">
+                  {bestSpeakerData[2].totalScore}
+                </div>
+                <div class="bg-orange-200 w-32 py-3 text-center rounded-b-lg font-medium">
+                  Third Place
+                  <div class="text-xs text-orange-700">Avg: {bestSpeakerData[2].averageScore}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    )}
   </div>
   
-  <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+  <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
     <h3 class="font-semibold mb-2">Catatan Perhitungan Best Speaker:</h3>
     <ul class="list-disc pl-5 space-y-1">
-      <li>Total dihitung dari penjumlahan skor di semua ronde</li>
+      <li>Total dihitung dari penjumlahan skor di semua ronde yang telah diinput</li>
       <li>Rata-rata dihitung dari Total dibagi jumlah ronde yang diikuti</li>
       <li>Peringkat ditentukan berdasarkan Total skor (dari tertinggi)</li>
+      <li>Data diambil secara real-time dari MongoDB</li>
     </ul>
   </div>
 </BaseLayout>
+
+<script>
+  /**
+   * Auto refresh setiap 30 detik untuk data terbaru
+   * @author made by Tamaes
+   */
+  // setInterval(() => {
+  //   window.location.reload();
+  // }, 30000); // 30 detik
+</script>
