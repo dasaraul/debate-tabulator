@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Home">
+  <div class="bg-white p-6 rounded-lg shadow">
+    <h2 class="text-2xl font-bold mb-4">Selamat Datang di Tabulator Debat</h2>
+    <p class="mb-4">
+      Sistem tabulator ini digunakan untuk menghitung dan mengelola skor kompetisi debat format British Parliamentary (BP).
+    </p>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+      <a href="/input" class="bg-blue-100 p-6 rounded-lg hover:bg-blue-200 transition">
+        <h3 class="text-xl font-bold mb-2">Input Skor</h3>
+        <p>Masukkan skor debat untuk setiap ronde, posisi, dan speaker.</p>
+      </a>
+      
+      <a href="/results" class="bg-green-100 p-6 rounded-lg hover:bg-green-200 transition">
+        <h3 class="text-xl font-bold mb-2">Hasil & Ranking</h3>
+        <p>Lihat hasil penilaian tim, peringkat, dan victory point.</p>
+      </a>
+      
+      <a href="/dashboard" class="bg-purple-100 p-6 rounded-lg hover:bg-purple-200 transition">
+        <h3 class="text-xl font-bold mb-2">Dashboard</h3>
+        <p>Panel kontrol dan visualisasi untuk keseluruhan kompetisi.</p>
+      </a>
+    </div>
+  </div>
+</BaseLayout>

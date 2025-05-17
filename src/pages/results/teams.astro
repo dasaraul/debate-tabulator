@@ -1,0 +1,254 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TeamScoreTable from '../../components/TeamScoreTable.jsx';
+
+// Data dummy untuk contoh hasil ronde BP 1
+const bp1Results = {
+  round: "BP 1",
+  room: "Room A",
+  motion: "This House believes that global green momentum cannot be achieved without Bipartisan Political Commitment to renewable energy innovation",
+  results: [
+    {
+      position: "OG",
+      teamName: "UCDS",
+      university: "Universitas Ciputra Surabaya",
+      speakers: [
+        { position: "PM", name: "Candra Giga Kharisma", score: 76 },
+        { position: "DPM", name: "Steven Adi Santoso", score: 76 }
+      ],
+      teamScore: 76,
+      rank: 1,
+      vp: 3
+    },
+    {
+      position: "OO",
+      teamName: "Marjorie",
+      university: "Universitas Diponegoro",
+      speakers: [
+        { position: "LO", name: "Putriku Salmaku", score: 74 },
+        { position: "DLO", name: "Mayritza Aurel", score: 73 }
+      ],
+      teamScore: 73.5,
+      rank: 2,
+      vp: 2
+    },
+    {
+      position: "CG",
+      teamName: "Tutty Fruity",
+      university: "Universitas Indonesia",
+      speakers: [
+        { position: "MG", name: "David Aryodhi", score: 76 },
+        { position: "GW", name: "Zhafa Yuda Rehema", score: 74 }
+      ],
+      teamScore: 75,
+      rank: 3,
+      vp: 1
+    },
+    {
+      position: "CO",
+      teamName: "Viva la Vida",
+      university: "Universitas Padjadjaran",
+      speakers: [
+        { position: "MO", name: "Ananda Arin Wahyuni", score: 70 },
+        { position: "OW", name: "Qonita Sholihah", score: 73 }
+      ],
+      teamScore: 71.5,
+      rank: 4,
+      vp: 0
+    }
+  ]
+};
+
+// Data dummy untuk contoh hasil ronde BP 2
+const bp2Results = {
+  round: "BP 2",
+  room: "Room B",
+  motion: "This house would abandon the narrative that the consequences of climate change are apocalyptics in nature",
+  results: [
+    {
+      position: "OG",
+      teamName: "Windi Wondo",
+      university: "Universitas Bunda Mulia",
+      speakers: [
+        { position: "PM", name: "Charlene Chie Putri", score: 77 },
+        { position: "DPM", name: "Thalia Zefanya", score: 78 }
+      ],
+      teamScore: 77.5,
+      rank: 1,
+      vp: 3
+    },
+    {
+      position: "OO",
+      teamName: "UCDS",
+      university: "Universitas Ciputra Surabaya",
+      speakers: [
+        { position: "LO", name: "Candra Giga Kharisma", score: 79 },
+        { position: "DLO", name: "Steven Adi Santoso", score: 80 }
+      ],
+      teamScore: 79.5,
+      rank: 2,
+      vp: 2
+    },
+    {
+      position: "CG",
+      teamName: "Prajurit",
+      university: "Universitas Trisakti",
+      speakers: [
+        { position: "MG", name: "Fauzan Athallah", score: 75 },
+        { position: "GW", name: "Dimas Prasetyo", score: 76 }
+      ],
+      teamScore: 75.5,
+      rank: 3,
+      vp: 1
+    },
+    {
+      position: "CO",
+      teamName: "Samudra",
+      university: "Universitas Indonesia",
+      speakers: [
+        { position: "MO", name: "Fajar Maulana", score: 74 },
+        { position: "OW", name: "Putri Rahmadhani", score: 73 }
+      ],
+      teamScore: 73.5,
+      rank: 4,
+      vp: 0
+    }
+  ]
+};
+
+// Data dummy untuk contoh hasil semifinal
+const semifinalResults = {
+  round: "Semifinal",
+  room: "Room A",
+  motion: "This house will ban high carbon polluting countries from participating in international events (not limited to international Olympics, summits, student exchanges, etc.)",
+  results: [
+    {
+      position: "OG",
+      teamName: "UCDS",
+      university: "Universitas Ciputra Surabaya",
+      speakers: [
+        { position: "PM", name: "Candra Giga Kharisma", score: 75 },
+        { position: "DPM", name: "Steven Adi Santoso", score: 75 }
+      ],
+      teamScore: 75,
+      rank: 1,
+      vp: 3
+    },
+    {
+      position: "OO",
+      teamName: "Windi Wondo",
+      university: "Universitas Bunda Mulia",
+      speakers: [
+        { position: "LO", name: "Charlene Chie Putri", score: 78 },
+        { position: "DLO", name: "Thalia Zefanya", score: 75 }
+      ],
+      teamScore: 76.5,
+      rank: 2,
+      vp: 2
+    },
+    {
+      position: "CG",
+      teamName: "Marjorie",
+      university: "Universitas Diponegoro",
+      speakers: [
+        { position: "MG", name: "Putriku Salmaku", score: 73 },
+        { position: "GW", name: "Mayritza Aurel", score: 74 }
+      ],
+      teamScore: 73.5,
+      rank: 3,
+      vp: 1
+    },
+    {
+      position: "CO",
+      teamName: "Tutty Fruity",
+      university: "Universitas Indonesia",
+      speakers: [
+        { position: "MO", name: "David Aryodhi", score: 71 },
+        { position: "OW", name: "Zhafa Yuda Rehema", score: 70 }
+      ],
+      teamScore: 70.5,
+      rank: 4,
+      vp: 0
+    }
+  ]
+};
+
+// Data dummy untuk final
+const finalResults = [
+  {
+    round: "Final 1",
+    results: [
+      {
+        position: "OG",
+        teamName: "UCDS",
+        university: "Universitas Ciputra Surabaya",
+        speakers: [
+          { position: "PM", name: "Candra Giga Kharisma", score: 74 },
+          { position: "DPM", name: "Steven Adi Santoso", score: 75 }
+        ],
+        teamScore: 74.5,
+        rank: 2,
+        vp: 2
+      },
+      {
+        position: "OO",
+        teamName: "Windi Wondo",
+        university: "Universitas Bunda Mulia",
+        speakers: [
+          { position: "LO", name: "Charlene Chie Putri", score: 74 },
+          { position: "DLO", name: "Thalia Zefanya", score: 75 }
+        ],
+        teamScore: 74.5,
+        rank: 3,
+        vp: 3
+      }
+    ]
+  }
+];
+---
+
+<BaseLayout title="Hasil Tim">
+  <div class="space-y-12">
+    <div>
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold">Hasil BP 1</h2>
+        <div class="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded">Room A</div>
+      </div>
+      
+      <div class="bg-white p-4 rounded-lg shadow mb-6">
+        <div class="text-sm text-gray-600 mb-2">Motion:</div>
+        <div class="bg-gray-50 p-3 rounded border">{bp1Results.motion}</div>
+      </div>
+      
+      <TeamScoreTable roundData={bp1Results} client:load />
+    </div>
+    
+    <div>
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold">Hasil BP 2</h2>
+        <div class="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded">Room B</div>
+      </div>
+      
+      <div class="bg-white p-4 rounded-lg shadow mb-6">
+        <div class="text-sm text-gray-600 mb-2">Motion:</div>
+        <div class="bg-gray-50 p-3 rounded border">{bp2Results.motion}</div>
+      </div>
+      
+      <TeamScoreTable roundData={bp2Results} client:load />
+    </div>
+    
+    <div>
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold">Hasil Semifinal</h2>
+        <div class="text-sm bg-green-100 text-green-800 px-3 py-1 rounded">Room A</div>
+      </div>
+      
+      <div class="bg-white p-4 rounded-lg shadow mb-6">
+        <div class="text-sm text-gray-600 mb-2">Motion:</div>
+        <div class="bg-gray-50 p-3 rounded border">{semifinalResults.motion}</div>
+      </div>
+      
+      <TeamScoreTable roundData={semifinalResults} client:load />
+    </div>
+  </div>
+</BaseLayout>

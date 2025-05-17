@@ -1,0 +1,172 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Panduan Penggunaan">
+  <div class="max-w-4xl mx-auto">
+    <div class="bg-white p-6 rounded-lg shadow mb-8">
+      <h2 class="text-2xl font-bold mb-4">Panduan Penggunaan Tabulator</h2>
+      <p class="mb-6">
+        Sistem tabulator ini dirancang untuk menghitung dan mengelola skor kompetisi debat dengan format British Parliamentary (BP).
+        Berikut adalah panduan untuk menggunakan sistem ini.
+      </p>
+      
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-xl font-semibold mb-2">Input Skor</h3>
+          <p class="mb-4">
+            Untuk menginput skor, pilih menu "Input Skor" dan ikuti langkah-langkah berikut:
+          </p>
+          <ol class="list-decimal pl-6 space-y-2">
+            <li>Pilih ronde (BP 1, BP 2, Semifinal, atau Final)</li>
+            <li>Masukkan informasi umum (ruangan, mosi)</li>
+            <li>Masukkan nama tim, universitas, dan nama peserta untuk setiap posisi</li>
+            <li>Input skor individu untuk setiap speaker</li>
+            <li>Sistem akan otomatis menghitung skor tim</li>
+            <li>Klik "Simpan Hasil" untuk menyimpan data</li>
+          </ol>
+        </div>
+        
+        <div>
+          <h3 class="text-xl font-semibold mb-2">Melihat Hasil</h3>
+          <p class="mb-4">
+            Untuk melihat hasil kompetisi, gunakan menu "Hasil" yang terdiri dari:
+          </p>
+          <ul class="list-disc pl-6 space-y-2">
+            <li><strong>Hasil Tim</strong> - Menampilkan hasil penilaian untuk setiap tim per ronde</li>
+            <li><strong>Ranking & Victory Points</strong> - Menampilkan peringkat tim berdasarkan Victory Points</li>
+            <li><strong>Best Speaker</strong> - Menampilkan peringkat best speaker berdasarkan akumulasi skor</li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="text-xl font-semibold mb-2">Format Penilaian</h3>
+          <div class="overflow-x-auto">
+            <table class="min-w-full border">
+              <thead>
+                <tr class="bg-gray-100">
+                  <th class="py-2 px-4 border">Kategori</th>
+                  <th class="py-2 px-4 border">Penjelasan</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="py-2 px-4 border font-medium">Skor Individu</td>
+                  <td class="py-2 px-4 border">
+                    Skala 70-80 (umumnya)<br>
+                    < 70: Di bawah standar<br>
+                    70-74: Cukup<br>
+                    75-77: Baik<br>
+                    78-80: Sangat baik<br>
+                    > 80: Luar biasa (jarang diberikan)
+                  </td>
+                </tr>
+                <tr class="bg-gray-50">
+                  <td class="py-2 px-4 border font-medium">Skor Tim</td>
+                  <td class="py-2 px-4 border">
+                    Rata-rata dari skor 2 speaker dalam satu tim
+                  </td>
+                </tr>
+                <tr>
+                  <td class="py-2 px-4 border font-medium">Ranking</td>
+                  <td class="py-2 px-4 border">
+                    Peringkat 1-4 berdasarkan skor tim dalam satu ruangan
+                  </td>
+                </tr>
+                <tr class="bg-gray-50">
+                  <td class="py-2 px-4 border font-medium">Victory Points</td>
+                  <td class="py-2 px-4 border">
+                    Rank #1: 3 poin<br>
+                    Rank #2: 2 poin<br>
+                    Rank #3: 1 poin<br>
+                    Rank #4: 0 poin
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div>
+          <h3 class="text-xl font-semibold mb-2">Posisi Debat</h3>
+          <p class="mb-4">
+            Format British Parliamentary (BP) terdiri dari 4 tim dengan 2 speaker per tim:
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-blue-50 p-4 rounded">
+              <h4 class="font-semibold mb-2">Opening Government (OG)</h4>
+              <ul class="list-disc pl-4">
+                <li>Prime Minister (PM)</li>
+                <li>Deputy Prime Minister (DPM)</li>
+              </ul>
+            </div>
+            
+            <div class="bg-red-50 p-4 rounded">
+              <h4 class="font-semibold mb-2">Opening Opposition (OO)</h4>
+              <ul class="list-disc pl-4">
+                <li>Leader of Opposition (LO)</li>
+                <li>Deputy Leader of Opposition (DLO)</li>
+              </ul>
+            </div>
+            
+            <div class="bg-green-50 p-4 rounded">
+              <h4 class="font-semibold mb-2">Closing Government (CG)</h4>
+              <ul class="list-disc pl-4">
+                <li>Member of Government (MG)</li>
+                <li>Government Whip (GW)</li>
+              </ul>
+            </div>
+            
+            <div class="bg-yellow-50 p-4 rounded">
+              <h4 class="font-semibold mb-2">Closing Opposition (CO)</h4>
+              <ul class="list-disc pl-4">
+                <li>Member of Opposition (MO)</li>
+                <li>Opposition Whip (OW)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
+      <h3 class="text-xl font-semibold mb-4">Pertanyaan yang Sering Diajukan</h3>
+      
+      <div class="space-y-4">
+        <div>
+          <h4 class="font-medium">Bagaimana cara menghitung skor tim?</h4>
+          <p class="text-gray-700">
+            Skor tim dihitung dengan mengambil rata-rata dari skor dua speaker dalam tim tersebut.
+            Misalnya: Jika Speaker 1 mendapat skor 75 dan Speaker 2 mendapat skor 77, maka skor tim adalah (75 + 77) / 2 = 76.
+          </p>
+        </div>
+        
+        <div>
+          <h4 class="font-medium">Bagaimana cara menentukan peringkat?</h4>
+          <p class="text-gray-700">
+            Peringkat ditentukan berdasarkan skor tim. Tim dengan skor tertinggi mendapat peringkat 1, dan seterusnya.
+          </p>
+        </div>
+        
+        <div>
+          <h4 class="font-medium">Bagaimana cara menghitung Victory Points?</h4>
+          <p class="text-gray-700">
+            Victory Points diberikan berdasarkan peringkat tim dalam satu ruangan:
+            <br>Peringkat 1: 3 VP
+            <br>Peringkat 2: 2 VP
+            <br>Peringkat 3: 1 VP
+            <br>Peringkat 4: 0 VP
+          </p>
+        </div>
+        
+        <div>
+          <h4 class="font-medium">Bagaimana cara menentukan Best Speaker?</h4>
+          <p class="text-gray-700">
+            Best Speaker ditentukan berdasarkan akumulasi skor individu dari seluruh ronde yang diikuti.
+            Speaker dengan total skor tertinggi menjadi Best Speaker.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

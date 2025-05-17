@@ -1,0 +1,210 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// Data dummy untuk dojo dan room
+const venueData = {
+  rooms: [
+    { name: "Room A", status: "BP 1 Selesai", teams: ["UCDS", "Marjorie", "Viva la Vida", "Moonlight"] },
+    { name: "Room B", status: "BP 1 Selesai", teams: ["Windi Wondo", "Tutty Fruity", "Prajurit", "Samudra"] },
+    { name: "Room C", status: "BP 1 Selesai", teams: ["Garuda", "Merpati", "Thunder", "Petir"] },
+    { name: "Room D", status: "BP 1 Selesai", teams: ["Mawar", "Melati", "Anggrek", "Bougenville"] },
+  ]
+};
+
+// Data dummy untuk hasil VP
+const vpResults = [
+  { team: "UCDS", vp: 18, rounds: ["BP 1", "BP 2", "Semifinal"] },
+  { team: "Windi Wondo", vp: 15, rounds: ["BP 1", "BP 2", "Semifinal"] },
+  { team: "Marjorie", vp: 14, rounds: ["BP 1", "BP 2", "Semifinal"] },
+  { team: "Tutty Fruity", vp: 12, rounds: ["BP 1", "BP 2", "Semifinal"] },
+  { team: "Prajurit", vp: 10, rounds: ["BP 1", "BP 2"] },
+  { team: "Viva la Vida", vp: 8, rounds: ["BP 1", "BP 2"] },
+  { team: "Samudra", vp: 7, rounds: ["BP 1", "BP 2"] },
+  { team: "Garuda", vp: 5, rounds: ["BP 1"] },
+];
+
+// Status progres turnamen
+const tournamentProgress = {
+  currentRound: "Semifinal",
+  completed: ["BP 1", "BP 2"],
+  upcoming: ["Final Day 1", "Final Day 2", "Final Day 3"],
+  totalTeams: 16,
+  remainingTeams: 4
+};
+
+const drawVictoryPointsChart = () => {
+    const ctx = document.getElementById('victoryPointsChart');
+    
+    if (!ctx) return;
+    
+    // Data untuk chart (dari contoh sebelumnya)
+    const teams = ['UCDS', 'Windi Wondo', 'Marjorie', 'Tutty Fruity', 'Prajurit'];
+    const vpData = [16, 12, 6, 2, 3];
+    
+    // Buat chart dengan library chart.js
+    // Catatan: Dalam implementasi nyata, ini akan menggunakan chart.js
+    // Di contoh ini hanya menampilkan representasi visual sederhana
+    
+    const chartContainer = document.createElement('div');
+    chartContainer.className = 'flex items-end h-64 space-x-2';
+    
+    teams.forEach((team, index) => {
+      const bar = document.createElement('div');
+      const height = (vpData[index] / Math.max(...vpData)) * 100;
+      bar.className = 'flex-1 bg-blue-500 rounded-t';
+      bar.style.height = `${height}%`;
+      
+      const label = document.createElement('div');
+      label.className = 'text-xs text-center mt-2 font-medium';
+      label.textContent = team;
+      
+      const valueLabel = document.createElement('div');
+      valueLabel.className = 'text-white text-center p-1 font-bold';
+      valueLabel.textContent = vpData[index];
+      bar.appendChild(valueLabel);
+      
+      const barContainer = document.createElement('div');
+      barContainer.className = 'flex flex-col items-center';
+      barContainer.appendChild(bar);
+      barContainer.appendChild(label);
+      
+      chartContainer.appendChild(barContainer);
+    });
+    
+    ctx.appendChild(chartContainer);
+  };
+  
+  // Initialize charts after page load
+  document.addEventListener('DOMContentLoaded', () => {
+    drawVictoryPointsChart();
+  });
+
+---
+
+<BaseLayout title="Dashboard">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <!-- Status Turnamen -->
+    <div class="bg-white p-6 rounded-lg shadow">
+      <h2 class="text-xl font-bold mb-4">Status Turnamen</h2>
+      
+      <div class="flex items-center mb-4">
+        <div class="text-2xl font-bold text-blue-700 mr-3">
+          {tournamentProgress.currentRound}
+        </div>
+        <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded text-sm">
+          Saat Ini
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <h3 class="text-sm font-semibold text-gray-500 mb-2">Ronde Selesai</h3>
+          <div class="space-y-1">
+            {tournamentProgress.completed.map(round => (
+              <div class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm inline-block mr-2">
+                {round} ✓
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        <div>
+          <h3 class="text-sm font-semibold text-gray-500 mb-2">Ronde Mendatang</h3>
+          <div class="space-y-1">
+            {tournamentProgress.upcoming.map(round => (
+              <div class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm inline-block mr-2">
+                {round}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-4 flex items-center">
+        <div class="text-lg font-semibold">{tournamentProgress.remainingTeams}/{tournamentProgress.totalTeams}</div>
+        <div class="ml-2 text-gray-600">Tim tersisa</div>
+      </div>
+    </div>
+    
+    <!-- Top Teams -->
+    <div class="bg-white p-6 rounded-lg shadow">
+      <h2 class="text-xl font-bold mb-4">Tim Teratas (Victory Points)</h2>
+      
+      <table class="min-w-full">
+        <thead>
+          <tr class="bg-gray-50">
+            <th class="py-2 px-3 text-left">Peringkat</th>
+            <th class="py-2 px-3 text-left">Tim</th>
+            <th class="py-2 px-3 text-left">Victory Points</th>
+            <th class="py-2 px-3 text-left">Ronde</th>
+          </tr>
+        </thead>
+        <tbody>
+          {vpResults.slice(0, 5).map((team, index) => (
+            <tr class={index % 2 === 0 ? 'bg-gray-50' : ''}>
+              <td class="py-2 px-3">{index + 1}</td>
+              <td class="py-2 px-3 font-medium">{team.team}</td>
+              <td class="py-2 px-3 font-bold">{team.vp}</td>
+              <td class="py-2 px-3 text-sm">
+                {team.rounds.map(round => (
+                  <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-1">
+                    {round}
+                  </span>
+                ))}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      
+      <div class="mt-4 text-right">
+        <a href="/results/rankings" class="text-blue-600 hover:underline">Lihat semua tim →</a>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Rooms -->
+  <div class="bg-white p-6 rounded-lg shadow mb-8">
+    <h2 class="text-xl font-bold mb-4">Status Room</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {venueData.rooms.map(room => (
+        <div class="border rounded-lg p-4">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-semibold">{room.name}</h3>
+            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+              {room.status}
+            </span>
+          </div>
+          
+          <div class="text-sm">
+            <div class="font-medium mb-1">Tim:</div>
+            <ul class="space-y-1">
+              {room.teams.map(team => (
+                <li>{team}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+  
+  <!-- Quick Actions -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <a href="/input" class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg p-4 text-center transition">
+      <div class="text-xl font-bold mb-2">Input Skor Baru</div>
+      <div class="text-sm">Tambahkan data skor baru</div>
+    </a>
+    
+    <a href="/results/best-speakers" class="bg-purple-600 hover:bg-purple-700 text-white rounded-lg p-4 text-center transition">
+      <div class="text-xl font-bold mb-2">Best Speaker</div>
+      <div class="text-sm">Lihat ranking best speaker</div>
+    </a>
+    
+    <a href="/results/rankings" class="bg-green-600 hover:bg-green-700 text-white rounded-lg p-4 text-center transition">
+      <div class="text-xl font-bold mb-2">Peringkat Tim</div>
+      <div class="text-sm">Lihat peringkat dan VP tim</div>
+    </a>
+  </div>
+</BaseLayout>

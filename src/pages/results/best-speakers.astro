@@ -1,0 +1,69 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BestSpeakerTable from '../../components/BestSpeakerTable.jsx';
+
+// Contoh data dummy untuk best speaker
+const bestSpeakerData = [
+  {
+    name: "Candra Giga Kharisma",
+    team: "UCDS",
+    university: "Universitas Ciputra Surabaya",
+    scores: [76, 79, 75, 74, 76, 77],
+    totalScore: 457,
+    average: 76.17
+  },
+  {
+    name: "Steven Adi Santoso",
+    team: "UCDS",
+    university: "Universitas Ciputra Surabaya",
+    scores: [76, 80, 74, 75, 77, 76],
+    totalScore: 458,
+    average: 76.33
+  },
+  {
+    name: "Charlene Chie Putri",
+    team: "Windi Wondo",
+    university: "Universitas Bunda Mulia",
+    scores: [75, 77, 78, 74, 74, 77],
+    totalScore: 455,
+    average: 75.83
+  },
+  {
+    name: "Thalia Zefanya",
+    team: "Windi Wondo",
+    university: "Universitas Bunda Mulia",
+    scores: [75, 78, 75, 75, 78, 77],
+    totalScore: 458,
+    average: 76.33
+  },
+  {
+    name: "Putriku Salmaku",
+    team: "Marjorie",
+    university: "Universitas Diponegoro",
+    scores: [74, 75, 73, 76, 74, 74],
+    totalScore: 446,
+    average: 74.33
+  }
+];
+---
+
+<BaseLayout title="Best Speaker">
+  <div class="bg-white p-6 rounded-lg shadow mb-8">
+    <h2 class="text-2xl font-bold mb-4">Hasil Best Speaker</h2>
+    <p class="mb-6">
+      Berikut adalah ranking best speaker berdasarkan akumulasi nilai dari seluruh ronde.
+      Nilai dihitung berdasarkan rata-rata skor individu dari setiap ronde.
+    </p>
+    
+    <BestSpeakerTable speakerData={bestSpeakerData} client:load />
+  </div>
+  
+  <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+    <h3 class="font-semibold mb-2">Catatan Perhitungan Best Speaker:</h3>
+    <ul class="list-disc pl-5 space-y-1">
+      <li>Total dihitung dari penjumlahan skor di semua ronde</li>
+      <li>Rata-rata dihitung dari Total dibagi jumlah ronde yang diikuti</li>
+      <li>Peringkat ditentukan berdasarkan Total skor (dari tertinggi)</li>
+    </ul>
+  </div>
+</BaseLayout>

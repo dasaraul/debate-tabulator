@@ -1,0 +1,227 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Data dummy untuk perolehan Victory Points
+const vpData = [
+  { 
+    rank: 1,
+    team: "UCDS", 
+    university: "Universitas Ciputra Surabaya",
+    BP1: 3,
+    BP2: 2,
+    SF: 3,
+    F1: 2,
+    F2: 3,
+    F3: 3,
+    total: 16
+  },
+  { 
+    rank: 2,
+    team: "Windi Wondo", 
+    university: "Universitas Bunda Mulia",
+    BP1: 1,
+    BP2: 3,
+    SF: 2,
+    F1: 3,
+    F2: 1,
+    F3: 2,
+    total: 12
+  },
+  { 
+    rank: 3,
+    team: "Marjorie", 
+    university: "Universitas Diponegoro",
+    BP1: 2,
+    BP2: 0,
+    SF: 1,
+    F1: 1,
+    F2: 2,
+    F3: 0,
+    total: 6
+  },
+  { 
+    rank: 4,
+    team: "Tutty Fruity", 
+    university: "Universitas Indonesia",
+    BP1: 0,
+    BP2: 1,
+    SF: 0,
+    F1: 0,
+    F2: 0,
+    F3: 1,
+    total: 2
+  },
+  { 
+    rank: 5,
+    team: "Prajurit", 
+    university: "Universitas Trisakti",
+    BP1: 2,
+    BP2: 1,
+    SF: "-",
+    F1: "-",
+    F2: "-",
+    F3: "-",
+    total: 3
+  },
+  { 
+    rank: 6,
+    team: "Samudra", 
+    university: "Universitas Indonesia",
+    BP1: 1,
+    BP2: 0,
+    SF: "-",
+    F1: "-",
+    F2: "-",
+    F3: "-",
+    total: 1
+  },
+  { 
+    rank: 7,
+    team: "Viva la Vida", 
+    university: "Universitas Padjadjaran",
+    BP1: 0,
+    BP2: 0,
+    SF: "-",
+    F1: "-",
+    F2: "-",
+    F3: "-",
+    total: 0
+  },
+];
+---
+
+<BaseLayout title="Ranking & Victory Points">
+  <div class="bg-white p-6 rounded-lg shadow mb-6">
+    <h2 class="text-2xl font-bold mb-4">Victory Points Leaderboard</h2>
+    <p class="mb-6">
+      Victory Points (VP) diberikan berdasarkan peringkat tim pada setiap ronde:
+      <span class="font-semibold">Peringkat #1: 3 poin</span>,
+      <span class="font-semibold">Peringkat #2: 2 poin</span>,
+      <span class="font-semibold">Peringkat #3: 1 poin</span>,
+      <span class="font-semibold">Peringkat #4: 0 poin</span>
+    </p>
+    
+    <div class="overflow-x-auto">
+      <table class="min-w-full border">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="py-2 px-4 border text-left">Rank</th>
+            <th class="py-2 px-4 border text-left">Tim</th>
+            <th class="py-2 px-4 border text-left">Universitas</th>
+            <th class="py-2 px-4 border text-center">BP 1</th>
+            <th class="py-2 px-4 border text-center">BP 2</th>
+            <th class="py-2 px-4 border text-center">SF</th>
+            <th class="py-2 px-4 border text-center">Final 1</th>
+            <th class="py-2 px-4 border text-center">Final 2</th>
+            <th class="py-2 px-4 border text-center">Final 3</th>
+            <th class="py-2 px-4 border text-center font-bold">Total VP</th>
+          </tr>
+        </thead>
+        <tbody>
+          {vpData.map((team, index) => (
+            <tr class={index % 2 === 0 ? 'bg-gray-50' : ''}>
+              <td class="py-2 px-4 border">{team.rank}</td>
+              <td class="py-2 px-4 border font-medium">{team.team}</td>
+              <td class="py-2 px-4 border">{team.university}</td>
+              <td class="py-2 px-4 border text-center">{team.BP1}</td>
+              <td class="py-2 px-4 border text-center">{team.BP2}</td>
+              <td class="py-2 px-4 border text-center">{team.SF}</td>
+              <td class="py-2 px-4 border text-center">{team.F1}</td>
+              <td class="py-2 px-4 border text-center">{team.F2}</td>
+              <td class="py-2 px-4 border text-center">{team.F3}</td>
+              <td class="py-2 px-4 border text-center font-bold">{team.total}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Top 3 Visualization -->
+    <div class="md:col-span-2 bg-white p-6 rounded-lg shadow">
+      <h2 class="text-xl font-bold mb-4">Top 3 Tim</h2>
+      
+      <div class="flex justify-center items-end space-x-8 h-64 my-8">
+        <!-- Second Place -->
+        <div class="flex flex-col items-center">
+          <div class="text-lg font-bold">{vpData[1].team}</div>
+          <div class="w-32 bg-silver h-48 flex items-center justify-center text-white text-2xl font-bold rounded-t-lg">
+            {vpData[1].total}
+          </div>
+          <div class="bg-gray-200 w-32 py-2 text-center rounded-b-lg">2nd</div>
+        </div>
+        
+        <!-- First Place -->
+        <div class="flex flex-col items-center">
+          <div class="text-lg font-bold">{vpData[0].team}</div>
+          <div class="w-32 bg-gold h-64 flex items-center justify-center text-white text-2xl font-bold rounded-t-lg">
+            {vpData[0].total}
+          </div>
+          <div class="bg-gray-200 w-32 py-2 text-center rounded-b-lg">1st</div>
+        </div>
+        
+        <!-- Third Place -->
+        <div class="flex flex-col items-center">
+          <div class="text-lg font-bold">{vpData[2].team}</div>
+          <div class="w-32 bg-bronze h-36 flex items-center justify-center text-white text-2xl font-bold rounded-t-lg">
+            {vpData[2].total}
+          </div>
+          <div class="bg-gray-200 w-32 py-2 text-center rounded-b-lg">3rd</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Final Qualification -->
+    <div class="bg-white p-6 rounded-lg shadow">
+      <h2 class="text-xl font-bold mb-4">Kualifikasi Final</h2>
+      
+      <div class="space-y-4">
+        <div class="p-4 bg-blue-50 border border-blue-200 rounded">
+          <h3 class="font-semibold mb-2">Babak Final</h3>
+          <ul class="space-y-2">
+            {vpData.slice(0, 4).map(team => (
+              <li class="flex items-center">
+                <span class="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-xs mr-2">✓</span>
+                <span>{team.team} ({team.total} VP)</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        
+        <div class="p-4 bg-gray-50 border border-gray-200 rounded">
+          <h3 class="font-semibold mb-2">Semifinal</h3>
+          <ul class="space-y-2">
+            {vpData.slice(0, 4).map(team => (
+              <li class="flex items-center">
+                <span class="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-xs mr-2">✓</span>
+                <span>{team.team} ({team.total} VP)</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        
+        <div class="p-4 bg-gray-50 border border-gray-200 rounded opacity-60">
+          <h3 class="font-semibold mb-2">16 Besar</h3>
+          <p class="text-sm text-gray-600">
+            {vpData.length} tim berkompetisi dengan format British Parliamentary
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .bg-gold {
+    background-color: #FFD700;
+  }
+  
+  .bg-silver {
+    background-color: #C0C0C0;
+  }
+  
+  .bg-bronze {
+    background-color: #CD7F32;
+  }
+</style>

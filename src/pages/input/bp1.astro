@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ScoreInput from '../../components/ScoreInput.jsx';
+---
+
+<BaseLayout title="Input Skor BP 1">
+  <div class="bg-blue-50 p-3 rounded-lg border border-blue-200 mb-6">
+    <p>Masukkan skor untuk Ronde Penyisihan 1 (BP 1). Pastikan mengisi seluruh data dengan lengkap.</p>
+  </div>
+  
+  <ScoreInput client:load onSave={(data) => {
+    console.log('Data saved:', data);
+    // Di implementasi sebenarnya, data akan disimpan ke database atau localStorage
+    // Dan kemudian user akan diarahkan ke halaman hasil
+    alert('Data berhasil disimpan!');
+  }} />
+</BaseLayout>

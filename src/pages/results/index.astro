@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Hasil Kompetisi">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <a href="/results/teams" class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+      <h2 class="text-2xl font-bold mb-4 text-blue-700">Hasil Tim</h2>
+      <p class="mb-4">Lihat hasil penilaian per tim untuk setiap ronde.</p>
+      <div class="text-sm text-blue-600">Lihat detail →</div>
+    </a>
+    
+    <a href="/results/rankings" class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+      <h2 class="text-2xl font-bold mb-4 text-green-700">Ranking & Victory Points</h2>
+      <p class="mb-4">Lihat peringkat tim dan perolehan victory points.</p>
+      <div class="text-sm text-green-600">Lihat detail →</div>
+    </a>
+    
+    <a href="/results/best-speakers" class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+      <h2 class="text-2xl font-bold mb-4 text-purple-700">Best Speaker</h2>
+      <p class="mb-4">Lihat ranking dan skor best speaker keseluruhan kompetisi.</p>
+      <div class="text-sm text-purple-600">Lihat detail →</div>
+    </a>
+  </div>
+</BaseLayout>
