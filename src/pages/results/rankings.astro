@@ -2,63 +2,73 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 /**
- * Halaman rankings dengan integrasi real-time MongoDB produksi
+ * Halaman rankings dengan HTTPS dan multiple endpoint support
  * @author made by Tamaes
  */
 let rankingsData = [];
 let error = null;
+let endpoint = '';
 
-// Deteksi environment dan return API URL yang benar
-const getApiUrl = () => {
+// Multiple API endpoints dengan priority
+const getApiEndpoints = () => {
   const hostname = Astro.url.hostname;
   const protocol = Astro.url.protocol;
   
+  const endpoints = [];
+  
   // Development
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return 'http://localhost:3001';
+    endpoints.push('http://localhost:3001/api');
+    endpoints.push('http://localhost:3001');
+    return endpoints;
   }
   
-  // Production domain
+  // Production - priority order
+  if (protocol === 'https:' && hostname === 'debate-tabulator.jawanich.my.id') {
+    endpoints.push('https://debate-tabulator.jawanich.my.id/api');
+  }
+  
   if (hostname === 'debate-tabulator.jawanich.my.id') {
-    return `${protocol}//${hostname}/api`;
+    endpoints.push('http://debate-tabulator.jawanich.my.id:8080/api');
   }
   
-  // Server IP fallback
-  if (hostname === '128.199.164.94') {
-    return `${protocol}//${hostname}/api`;
-  }
+  endpoints.push('http://128.199.164.94:8080/api');
   
-  // Default
-  return `${protocol}//${hostname}/api`;
+  return endpoints;
 };
 
-try {
-  const apiUrl = getApiUrl();
-  const endpoint = apiUrl.includes('/api') ? `${apiUrl}/rankings` : `${apiUrl}/api/rankings`;
-  
-  console.log(`Fetching rankings from: ${endpoint}`);
-  
-  const response = await fetch(endpoint);
-  const result = await response.json();
-  
-  if (result.success) {
-    rankingsData = result.data;
-    console.log(`✅ Loaded ${rankingsData.length} teams from MongoDB`);
-  } else {
-    error = result.error || 'Unknown error from API';
-    console.error('❌ API returned error:', error);
+// Try multiple endpoints for rankings
+const endpoints = getApiEndpoints();
+for (const apiUrl of endpoints) {
+  try {
+    endpoint = `${apiUrl}/rankings`;
+    console.log(`Trying: ${endpoint}`);
+    
+    const response = await fetch(endpoint);
+    const result = await response.json();
+    
+    if (result.success) {
+      rankingsData = result.data;
+      break;
+    } else {
+      throw new Error(result.error || 'API returned error');
+    }
+  } catch (err) {
+    console.warn(`Failed: ${endpoint} - ${err.message}`);
+    if (endpoints.indexOf(apiUrl) === endpoints.length - 1) {
+      error = err.message;
+    }
+    continue;
   }
-} catch (err) {
-  error = err.message;
-  console.error('❌ Error fetching rankings:', err);
 }
 
-// Calculate qualifying teams
+// Calculate qualification tiers
 const finalQualifiers = rankingsData.slice(0, 4);
 const semifinalQualifiers = rankingsData.slice(0, 8);
+const isSecure = Astro.url.protocol === 'https:';
 ---
 
-<BaseLayout title="Ranking & Victory Points">
+<BaseLayout title="Rankings & Victory Points">
   <div class="bg-white p-6 rounded-lg shadow mb-6">
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-2xl font-bold">🏅 Victory Points Leaderboard</h2>
@@ -67,84 +77,81 @@ const semifinalQualifiers = rankingsData.slice(0, 8);
           onclick="window.location.reload()" 
           class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
         >
-          🔄 Refresh Data
+          🔄 Refresh
         </button>
         <a 
           href="/input" 
           class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
         >
-          ➕ Input Data Baru
+          ➕ Input Data
         </a>
       </div>
     </div>
     
+    <div class={`mb-4 p-3 rounded border ${isSecure ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'}`}>
+      <p class={`text-sm ${isSecure ? 'text-green-800' : 'text-blue-800'}`}>
+        {isSecure ? '🔒 Secure HTTPS Connection' : '🌐 HTTP Connection'} • 
+        {rankingsData.length > 0 ? 
+          `Data loaded from: ${endpoint}` : 
+          `Trying multiple endpoints for reliability`
+        }
+      </p>
+    </div>
+    
     {error ? (
       <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-        <h3 class="text-red-800 font-semibold mb-2">❌ Error Loading Rankings from MongoDB</h3>
+        <h3 class="text-red-800 font-semibold mb-2">❌ Unable to Load Rankings</h3>
         <p class="text-red-700 mb-3">Error: {error}</p>
         <div class="text-red-600 text-sm">
-          <p class="font-medium mb-2">Kemungkinan penyebab:</p>
+          <p class="font-medium mb-2">Possible causes:</p>
           <ul class="list-disc pl-5 space-y-1">
-            <li>API server tidak berjalan pada port 3001</li>
-            <li>Masalah koneksi MongoDB Atlas</li>
-            <li>Nginx proxy configuration error</li>
-            <li>CORS issues</li>
-            <li>Belum ada data yang diinput ke database</li>
+            <li>API server not running</li>
+            <li>Database connection issues</li>
+            <li>Network connectivity problems</li>
+            <li>No ranking data available yet</li>
           </ul>
-          <p class="mt-3 font-medium">Solusi:</p>
-          <ul class="list-disc pl-5 space-y-1">
-            <li>Cek API: <code class="bg-red-100 px-1 rounded">curl https://debate-tabulator.jawanich.my.id/health</code></li>
-            <li>PM2 status: <code class="bg-red-100 px-1 rounded">pm2 status</code></li>
-            <li>Input data skor: <a href="/input" class="underline text-blue-600 font-medium">Input Skor →</a></li>
-          </ul>
+          <p class="mt-3">
+            <a href="/input" class="text-red-800 underline font-medium">
+              → Input round data first
+            </a> or 
+            <button onclick="window.location.reload()" class="text-red-800 underline">
+              refresh this page
+            </button>
+          </p>
         </div>
       </div>
     ) : rankingsData.length === 0 ? (
       <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-        <h3 class="text-yellow-800 font-semibold mb-2">📭 Belum Ada Data Ranking</h3>
-        <p class="text-yellow-700 mb-2">MongoDB terhubung tapi belum ada data ranking tersedia.</p>
-        <div class="mt-3">
-          <a 
-            href="/input" 
-            class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition font-medium"
-          >
-            🚀 Input Data Skor Pertama
-          </a>
-        </div>
+        <h3 class="text-yellow-800 font-semibold mb-2">📭 No Ranking Data</h3>
+        <p class="text-yellow-700 mb-3">Database connected but no ranking data available yet.</p>
+        <a 
+          href="/input" 
+          class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition font-medium"
+        >
+          🚀 Input First Round Data
+        </a>
       </div>
     ) : (
       <>
         <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <h3 class="font-semibold mb-2">📊 Victory Points System:</h3>
+          <h3 class="font-semibold mb-3 text-blue-800">📊 Victory Points System:</h3>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div class="text-center p-2 bg-green-100 rounded">
-              <div class="font-bold text-green-800 text-lg">3 VP</div>
-              <div class="text-green-700">Peringkat #1</div>
+            <div class="text-center p-3 bg-green-100 rounded-lg border">
+              <div class="font-bold text-green-800 text-xl">3 VP</div>
+              <div class="text-green-700">1st Place</div>
             </div>
-            <div class="text-center p-2 bg-blue-100 rounded">
-              <div class="font-bold text-blue-800 text-lg">2 VP</div>
-              <div class="text-blue-700">Peringkat #2</div>
+            <div class="text-center p-3 bg-blue-100 rounded-lg border">
+              <div class="font-bold text-blue-800 text-xl">2 VP</div>
+              <div class="text-blue-700">2nd Place</div>
             </div>
-            <div class="text-center p-2 bg-yellow-100 rounded">
-              <div class="font-bold text-yellow-800 text-lg">1 VP</div>
-              <div class="text-yellow-700">Peringkat #3</div>
+            <div class="text-center p-3 bg-yellow-100 rounded-lg border">
+              <div class="font-bold text-yellow-800 text-xl">1 VP</div>
+              <div class="text-yellow-700">3rd Place</div>
             </div>
-            <div class="text-center p-2 bg-gray-100 rounded">
-              <div class="font-bold text-gray-800 text-lg">0 VP</div>
-              <div class="text-gray-700">Peringkat #4</div>
+            <div class="text-center p-3 bg-gray-100 rounded-lg border">
+              <div class="font-bold text-gray-800 text-xl">0 VP</div>
+              <div class="text-gray-700">4th Place</div>
             </div>
-          </div>
-        </div>
-        
-        <div class="mb-4 bg-green-50 border border-green-200 rounded-lg p-3">
-          <div class="flex items-center justify-between">
-            <p class="text-green-800 text-sm">
-              ✅ Data loaded from <strong>MongoDB Atlas</strong> • 
-              Total teams: <strong>{rankingsData.length}</strong>
-            </p>
-            <p class="text-green-700 text-xs">
-              Updated: <strong>{new Date().toLocaleString()}</strong>
-            </p>
           </div>
         </div>
         
@@ -152,13 +159,13 @@ const semifinalQualifiers = rankingsData.slice(0, 8);
           <table class="min-w-full border">
             <thead>
               <tr class="bg-gray-100">
-                <th class="py-2 px-4 border text-left">Rank</th>
-                <th class="py-2 px-4 border text-left">Tim</th>
-                <th class="py-2 px-4 border text-left">Universitas</th>
-                <th class="py-2 px-4 border text-center">Total VP</th>
-                <th class="py-2 px-4 border text-center">Ronde</th>
-                <th class="py-2 px-4 border text-center">VP Details</th>
-                <th class="py-2 px-4 border text-center">Status</th>
+                <th class="py-3 px-4 border text-left">Rank</th>
+                <th class="py-3 px-4 border text-left">Team</th>
+                <th class="py-3 px-4 border text-left">University</th>
+                <th class="py-3 px-4 border text-center">Total VP</th>
+                <th class="py-3 px-4 border text-center">Rounds</th>
+                <th class="py-3 px-4 border text-center">Round Details</th>
+                <th class="py-3 px-4 border text-center">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -181,7 +188,7 @@ const semifinalQualifiers = rankingsData.slice(0, 8);
                   </td>
                   <td class="py-3 px-4 border font-medium">{team.name}</td>
                   <td class="py-3 px-4 border text-sm">{team.university}</td>
-                  <td class="py-3 px-4 border text-center font-bold text-lg text-green-600">{team.totalVP}</td>
+                  <td class="py-3 px-4 border text-center font-bold text-xl text-green-600">{team.totalVP}</td>
                   <td class="py-3 px-4 border text-center">
                     <span class="bg-gray-100 text-gray-800 text-sm px-2 py-1 rounded">
                       {team.roundsCount}
@@ -204,16 +211,16 @@ const semifinalQualifiers = rankingsData.slice(0, 8);
                   </td>
                   <td class="py-3 px-4 border text-center">
                     {index < 4 ? (
-                      <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
+                      <span class="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-medium">
                         🏆 Final
                       </span>
                     ) : index < 8 ? (
-                      <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium">
+                      <span class="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-medium">
                         🔥 Semifinal
                       </span>
                     ) : (
-                      <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
-                        Eliminated
+                      <span class="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">
+                        Break Round
                       </span>
                     )}
                   </td>
@@ -228,13 +235,13 @@ const semifinalQualifiers = rankingsData.slice(0, 8);
   
   {rankingsData.length > 0 && (
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Top 3 Podium -->
+      <!-- Podium -->
       <div class="bg-white p-6 rounded-lg shadow">
-        <h2 class="text-xl font-bold mb-4">🏆 Top 3 Tim</h2>
+        <h2 class="text-xl font-bold mb-4">🏆 Championship Podium</h2>
         
         {rankingsData.length >= 3 ? (
           <div class="flex justify-center items-end space-x-8 h-64 my-8">
-            <!-- Second Place -->
+            <!-- Second -->
             <div class="flex flex-col items-center">
               <div class="text-center mb-2">
                 <div class="text-lg font-bold">{rankingsData[1].name}</div>
@@ -242,7 +249,7 @@ const semifinalQualifiers = rankingsData.slice(0, 8);
               </div>
               <div class="w-32 bg-gray-400 h-48 flex flex-col items-center justify-center text-white rounded-t-lg shadow-lg">
                 <div class="text-2xl font-bold">{rankingsData[1].totalVP}</div>
-                <div class="text-sm">VP</div>
+                <div class="text-sm">Victory Points</div>
               </div>
               <div class="bg-gray-200 w-32 py-2 text-center rounded-b-lg">
                 <div class="font-medium">🥈 2nd Place</div>
@@ -250,7 +257,7 @@ const semifinalQualifiers = rankingsData.slice(0, 8);
               </div>
             </div>
             
-            <!-- First Place -->
+            <!-- Champion -->
             <div class="flex flex-col items-center">
               <div class="text-center mb-2">
                 <div class="text-lg font-bold">{rankingsData[0].name}</div>
@@ -258,15 +265,15 @@ const semifinalQualifiers = rankingsData.slice(0, 8);
               </div>
               <div class="w-32 bg-yellow-500 h-64 flex flex-col items-center justify-center text-white rounded-t-lg shadow-xl">
                 <div class="text-3xl font-bold">{rankingsData[0].totalVP}</div>
-                <div class="text-sm">VP</div>
+                <div class="text-sm">Victory Points</div>
               </div>
               <div class="bg-yellow-200 w-32 py-2 text-center rounded-b-lg">
-                <div class="font-bold text-yellow-800">🏆 Champion</div>
+                <div class="font-bold text-yellow-800">🏆 CHAMPION</div>
                 <div class="text-xs text-yellow-700">{rankingsData[0].roundsCount} rounds</div>
               </div>
             </div>
             
-            <!-- Third Place -->
+            <!-- Third -->
             <div class="flex flex-col items-center">
               <div class="text-center mb-2">
                 <div class="text-lg font-bold">{rankingsData[2].name}</div>
@@ -274,7 +281,7 @@ const semifinalQualifiers = rankingsData.slice(0, 8);
               </div>
               <div class="w-32 bg-amber-600 h-36 flex flex-col items-center justify-center text-white rounded-t-lg shadow-lg">
                 <div class="text-2xl font-bold">{rankingsData[2].totalVP}</div>
-                <div class="text-sm">VP</div>
+                <div class="text-sm">Victory Points</div>
               </div>
               <div class="bg-amber-200 w-32 py-2 text-center rounded-b-lg">
                 <div class="font-medium">🥉 3rd Place</div>
@@ -283,75 +290,56 @@ const semifinalQualifiers = rankingsData.slice(0, 8);
             </div>
           </div>
         ) : (
-          <p class="text-gray-500 text-center py-8">Belum cukup data untuk menampilkan podium</p>
+          <p class="text-gray-500 text-center py-8">Need at least 3 teams for podium display</p>
         )}
       </div>
       
-      <!-- Tournament Progress & Statistics -->
+      <!-- Tournament Progress -->
       <div class="bg-white p-6 rounded-lg shadow">
         <h2 class="text-xl font-bold mb-4">📊 Tournament Progress</h2>
         
         <div class="space-y-4">
-          {finalQualifiers.length > 0 && (
-            <div class="p-4 bg-green-50 border border-green-200 rounded">
-              <h3 class="font-semibold mb-2 text-green-800">🏆 Final Qualifiers</h3>
-              <div class="text-sm text-green-700 mb-2">
-                Total: <strong>{finalQualifiers.length} tim</strong>
-              </div>
-              <div class="grid grid-cols-1 gap-1">
-                {finalQualifiers.map(team => (
-                  <div class="flex items-center justify-between bg-green-100 p-2 rounded text-sm">
-                    <span class="font-medium">{team.name}</span>
-                    <span class="text-green-800 font-bold">{team.totalVP} VP</span>
-                  </div>
-                ))}
-              </div>
+          <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+            <h3 class="font-semibold mb-2 text-green-800">🏆 Final Qualifiers (Top 4)</h3>
+            <div class="text-sm text-green-700 mb-2">
+              Total: <strong>{finalQualifiers.length} teams</strong>
             </div>
-          )}
-          
-          {semifinalQualifiers.length > 4 && (
-            <div class="p-4 bg-blue-50 border border-blue-200 rounded">
-              <h3 class="font-semibold mb-2 text-blue-800">🔥 Semifinal Qualifiers</h3>
-              <div class="text-sm text-blue-700 mb-2">
-                Total: <strong>{Math.min(8, semifinalQualifiers.length)} tim</strong>
-              </div>
-              <div class="grid grid-cols-1 gap-1">
-                {semifinalQualifiers.slice(4, 8).map(team => (
-                  <div class="flex items-center justify-between bg-blue-100 p-2 rounded text-sm">
-                    <span class="font-medium">{team.name}</span>
-                    <span class="text-blue-800 font-bold">{team.totalVP} VP</span>
-                  </div>
-                ))}
-              </div>
+            <div class="space-y-1">
+              {finalQualifiers.map((team, idx) => (
+                <div key={idx} class="flex items-center justify-between bg-green-100 p-2 rounded text-sm">
+                  <span class="font-medium">#{team.rank} {team.name}</span>
+                  <span class="text-green-800 font-bold">{team.totalVP} VP</span>
+                </div>
+              ))}
             </div>
-          )}
+          </div>
           
-          <div class="p-4 bg-gray-50 border border-gray-200 rounded">
+          <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
             <h3 class="font-semibold mb-3">📈 Tournament Statistics</h3>
             <div class="grid grid-cols-2 gap-4 text-sm">
-              <div class="bg-white p-3 rounded shadow-sm">
+              <div class="bg-white p-3 rounded shadow-sm border">
                 <div class="text-gray-600">Total Teams</div>
                 <div class="text-2xl font-bold text-blue-600">{rankingsData.length}</div>
               </div>
-              <div class="bg-white p-3 rounded shadow-sm">
-                <div class="text-gray-600">Avg Rounds</div>
+              <div class="bg-white p-3 rounded shadow-sm border">
+                <div class="text-gray-600">Active Teams</div>
                 <div class="text-2xl font-bold text-green-600">
-                  {rankingsData.length > 0 ? 
-                    (rankingsData.reduce((sum, team) => sum + team.roundsCount, 0) / rankingsData.length).toFixed(1) 
-                    : '0'
-                  }
+                  {rankingsData.filter(t => t.roundsCount > 0).length}
                 </div>
               </div>
-              <div class="bg-white p-3 rounded shadow-sm">
+              <div class="bg-white p-3 rounded shadow-sm border">
                 <div class="text-gray-600">Highest VP</div>
                 <div class="text-2xl font-bold text-purple-600">
                   {rankingsData.length > 0 ? Math.max(...rankingsData.map(t => t.totalVP)) : '0'}
                 </div>
               </div>
-              <div class="bg-white p-3 rounded shadow-sm">
-                <div class="text-gray-600">Active Teams</div>
+              <div class="bg-white p-3 rounded shadow-sm border">
+                <div class="text-gray-600">Avg Rounds</div>
                 <div class="text-2xl font-bold text-orange-600">
-                  {rankingsData.filter(t => t.roundsCount > 0).length}
+                  {rankingsData.length > 0 ? 
+                    (rankingsData.reduce((sum, team) => sum + team.roundsCount, 0) / rankingsData.length).toFixed(1) 
+                    : '0'
+                  }
                 </div>
               </div>
             </div>
@@ -363,47 +351,34 @@ const semifinalQualifiers = rankingsData.slice(0, 8);
   
   <!-- System Info -->
   <div class="bg-blue-50 p-4 rounded-lg border border-blue-200 mt-6">
-    <h3 class="font-semibold mb-2">🔗 Production System Info:</h3>
+    <h3 class="font-semibold mb-2">🔗 Production System:</h3>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
       <ul class="list-disc pl-5 space-y-1">
-        <li>Data source: <strong>MongoDB Atlas (Production)</strong></li>
-        <li>API server: <strong>Express.js (Port 3001)</strong></li>
-        <li>Domain: <strong>debate-tabulator.jawanich.my.id</strong></li>
-        <li>Total VP dihitung dari akumulasi semua ronde</li>
+        <li>Database: <strong>MongoDB Atlas (Production)</strong></li>
+        <li>Security: <strong>{isSecure ? 'HTTPS/SSL Enabled' : 'HTTP Connection'}</strong></li>
+        <li>Reliability: <strong>Multiple endpoint fallback</strong></li>
+        <li>Real-time: <strong>Auto-update on new data</strong></li>
       </ul>
       <ul class="list-disc pl-5 space-y-1">
-        <li>Peringkat berdasarkan Total VP → jumlah ronde</li>
-        <li>Border hijau = Final, biru = Semifinal</li>
-        <li>API Endpoint: <code class="bg-blue-100 px-1 rounded">/api/rankings</code></li>
-        <li>Auto-update dengan input skor baru</li>
+        <li>VP calculated from round placements</li>
+        <li>Teams ranked by total VP → round count</li>
+        <li>Color coding: Green=Final, Blue=Semi</li>
+        <li>Updated: <strong>{new Date().toLocaleString()}</strong></li>
       </ul>
     </div>
   </div>
 </BaseLayout>
 
 <script is:inline>
-  /**
-   * Console logging dan optional auto-refresh
-   * @author made by Tamaes
-   */
-  
-  // Tampilkan informasi koneksi di console
+  // Enhanced console logging for rankings
   console.log('🏅 Rankings Page Loaded');
-  console.log('🔗 Current domain:', window.location.hostname);
-  console.log('📡 API calls will be made to:', window.location.hostname === 'localhost' ? 'localhost:3001' : window.location.hostname + '/api');
+  console.log('🔒 Security:', window.location.protocol);
+  console.log('🌐 Domain:', window.location.hostname);
   
-  // Function untuk manual refresh
-  window.refreshData = function() {
-    console.log('🔄 Manual refresh triggered');
-    window.location.reload();
-  };
-  
-  // Optional: Auto-refresh every 3 minutes
-  // Uncomment untuk enable auto-refresh
-  /*
-  setInterval(() => {
-    console.log('🔄 Auto-refreshing rankings data...');
-    window.location.reload();
-  }, 180000); // 3 minutes
-  */
+  const isSecure = window.location.protocol === 'https:';
+  if (isSecure) {
+    console.log('✅ Secure HTTPS connection established');
+  } else {
+    console.log('ℹ️ HTTP connection active');
+  }
 </script>
